@@ -62,42 +62,45 @@ span.name {
 </head>
 <body>
 
-<a id="link" href="#">BM</a> <small>← drag to bookmark bar</small>
+<a id="link" href="#">FDM-Fetch</a> <small>← drag to bookmark bar</small>
 
 <div id="import">Drop bookmark here to import</div>
 
-<div id="editor">const vids = document.getElementsByTagName('video');
+<div id="editor">const vids=document.getElementsByTagName('video');
 if (vids.length)
 {
-    const v = vids[0];
+    const v=vids[0];
     if (v.src.startsWith('blob:'))
     {
         if (window.jwplayer)
         {
-            const fn = window.jwplayer().getPlaylist()[0].file;
-            console.log(fn);
-            const a = document.createElement('a');
-            document.body.appendChild(a);
-            a.style = 'display:none';
-            a.href = fn;
-            a.setAttribute('download', fn.substring(fn.lastIndexOf('/') + 1));
-            a.click();
+            const fn=window.jwplayer().getPlaylist()[0].file;
+            fetch('http://localhost:8888/adddownload.req?URL='+encodeURI(fn));
         }
         else window.alert('This streaming hoster is not supported since it uses encrypted HLS URLs, please select a different hoster.');
     }
     else
     {
         console.log(v.src);
-        location.href=v.src;
+        fetch('http://localhost:8888/adddownload.req?URL='+encodeURI(v.src));
     }
     return;
 }
-const frm = document.querySelector('iframe');
-if (frm) location.href = frm.src;
+const frms=document.getElementsByTagName('iframe');
+for(let frm of frms)
+{
+    console.log('iframe', frm.src);
+    if (!frm.src)frm=frm.documentElement.getElementsByTagName('iframe')[0];
+    if (frm.src !='' && !frm.src.includes('facebook')&& !frm.src.includes('google'))
+    {
+        location.href=frm.src;
+        break;
+    }
+}
 </div>
 
 <button id="update">Update bookmark</button>
-<span class="name">Bookmark name: <input type="text" id="name" value="BM" size="12"></span>
+<span class="name">Bookmark name: <input type="text" id="name" value="FDM-Fetch" size="12"></span>
 
 <textarea id="result"></textarea>
 
