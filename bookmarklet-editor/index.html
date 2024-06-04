@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Bookmarklet Editor</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link rel="shortcut icon" href="favicon.ico" type="image/ico">
+<style>
+body {
+    margin: 15px;
+    font-family: arial;
+}
+#link {
+    text-decoration: none;
+    border: 1px solid black;
+    padding: 3px 6px;
+    background: white;
+    user-select: none;
+    color: black;
+    display: inline-block;
+}
+#editor {
+    min-height: 480px;
+    display: block;
+    margin-top: 20px;
+    border: 1px solid #8f8f9d;
+}
+button {
+    margin-top: 10px;
+}
+#result {
+    min-height: 200px;
+    width: -webkit-fill-available;
+    width: -moz-available;
+    display: block;
+    margin-top: 20px;
+    font: 12px/normal 'Consolas';
+}
+span.name {
+    margin-left: 20px;
+    font-size: 12px;
+}
+#name {
+    font-size: 12px;
+}
+.highlight {
+    outline: 3px dotted blue;
+}
+#import {
+    user-select: none;
+    padding: 3px 6px;
+    border: 1px solid black;
+    float:right;
+}
+#import:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+</style>
+</head>
+<body>
+
+<a id="link" href="#">BM</a> <small>← drag to bookmark bar</small>
+
+<div id="import">Drop bookmark here to import</div>
+
+<div id="editor">const vids = document.getElementsByTagName('video');
+if (vids.length)
+{
+    const v = vids[0];
+    if (v.src.startsWith('blob:'))
+    {
+        if (window.jwplayer)
+        {
+            const fn = window.jwplayer().getPlaylist()[0].file;
+            console.log(fn);
+            const a = document.createElement('a');
+            document.body.appendChild(a);
+            a.style = 'display:none';
+            a.href = fn;
+            a.setAttribute('download', fn.substring(fn.lastIndexOf('/') + 1));
+            a.click();
+        }
+        else window.alert('This streaming hoster is not supported since it uses encrypted HLS URLs, please select a different hoster.');
+    }
+    else
+    {
+        console.log(v.src);
+        location.href=v.src;
+    }
+    return;
+}
+const frm = document.querySelector('iframe');
+if (frm) location.href = frm.src;
+</div>
+
+<button id="update">Update bookmark</button>
+<span class="name">Bookmark name: <input type="text" id="name" value="BM" size="12"></span>
+
+<textarea id="result"></textarea>
+
+<button id="save_html">Save as bookmarks.html</button>
+<span class="name">Icon: <input type="text" id="icon" value="" size="48"></span>
+
+<script src="ace/ace.js"></script>
+<script>
+const editor = ace.edit("editor");
+const result = document.querySelector('#result');
+const a = document.querySelector('#link');
+const input_name = document.querySelector('#name');
+const input_icon = document.querySelector('#icon');
+
+editor.setTheme('ace/theme/textmate');
+editor.session.setMode('ace/mode/javascript');
+editor.session.setUseWrapMode(true);
+editor.setOption('dragEnabled', false);
+
+const parts = location.href.split('/');
+parts.pop(),
+input_icon.value = parts.join('/') + '/favicon.ico';
+
+function update_bookmark()
+{
+    //let txt = edit.value.trim();
+    let txt = editor.getValue().trim();
+    if (txt.substr(-1) == ';')
+        txt = txt.substr(0, txt.length - 1);
+    const lines = txt.split('\n');
+    let res = [];
+    for (let l of lines)
+    {
+        l = l.trim();
+        if (l.startsWith('//'))
+            continue;
+
+//        l = l.replace(
+////            /((?:[^\\]|^)(?:\\{2})*(?:"[^"\\]*(?:\\[^][^"\\]*)*"|'[^'\\]*(?:\\[^][^'\\]*)*'))|( *)([,;+-/:={}<>\(\)])( *)/g,
+//            /((?:[^\\]|^)(?:\\{2})*(?:"[^"\\]*(?:\\[^][^"\\]*)*"|'[^'\\]*(?:\\[^][^'\\]*)*'|`[^`\\]*(?:\\[^][^`\\]*)*`))|( *)([,;+-/:={}<>\(\)])( *)/g,
+//            (match, group) => group || match.trim()
+//        );
+
+        if ([',', ';', ')', '{', '}', '.'].indexOf(l.substr(-1)) == -1)
+            l += ' ';
+        res.push(l);
+    }
+    res = 'javascript:(function(){' + res.join('').trim().replaceAll(' ', '%20').replaceAll('"', '&quot;') + '})();';
+    //res = 'javascript:(function(){' + encodeURIComponent(res.join('').trim()) + '})();';
+    result.value = res;
+    a.href = res;
+    a.innerText = input_name.value;
+}
+
+document.querySelector('#update').onclick = update_bookmark;
+
+
+function export_html(icon_url)
+{
+    const a = document.createElement('a');
+    document.body.appendChild(a);
+    a.style = 'display:none';
+    a.innerText = input_name.value + '.html';
+    if (icon_url)
+        // ICON: Chrome, ICON_URI: Firefox
+        a.href = 'data:text/html;charset=utf-8,' + encodeURIComponent('<A HREF="' + result.value + '" ICON="'+icon_url+'" ICON_URI="'+icon_url+'">'+input_name.value+'</A>');
+    else
+        a.href = 'data:text/html;charset=utf-8,' + encodeURIComponent('<A HREF="' + result.value + '">'+input_name.value+'</A>');
+    a.setAttribute('download', input_name.value + '.html');
+    a.click();
+}
+
+
+document.querySelector('#save_html').onclick = async function(){
+    update_bookmark();
+    if (input_icon.value.startsWith('http'))
+    {
+        let blob = await fetch(input_icon.value)
+        .then(r => r.blob());
+        let dataUrl = await new Promise(resolve => {
+            let reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.readAsDataURL(blob);
+        });
+        export_html(dataUrl.replace('image/vnd.microsoft.icon;','image/x-icon;'));
+    }
+    else
+        export_html(input_icon.value);
+};
+
+function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+
+const div_import = document.querySelector('#import');
+
+div_import.addEventListener('dragenter', function(e){
+    preventDefaults(e);
+    this.classList.add('highlight');
+});
+
+div_import.addEventListener('dragleave', function(e){
+    preventDefaults(e);
+    this.classList.remove('highlight');
+});
+
+div_import.addEventListener('dragover', function(e){
+    preventDefaults(e);
+    this.classList.add('highlight');
+});
+
+div_import.addEventListener('drop', function(e){
+    preventDefaults(e);
+    this.classList.remove('highlight');
+    for (let i of e.dataTransfer.items)
+    {
+        if (i.type == 'text/x-moz-place')
+        {
+            i.getAsString(s => {
+                const data = JSON.parse(s);
+
+                let code = decodeURIComponent(data.uri);
+                //console.log(code);
+
+                // remove "javascript:(function(){" and "})();"
+                code = code.substring(23, code.length - 5);
+
+                //TEST
+                code = code.replaceAll(/{(?=(?:(?:[^"]*"){2})*[^"]*$)/g, '\n{\n');
+                code = code.replaceAll(/}(?=(?:(?:[^"]*"){2})*[^"]*$)/g, '\n}\n');
+
+//                code = code.replaceAll('{', '\n{\n');
+//                code = code.replaceAll(/}([^;])/g, '}\n$1');
+
+                //code = code.replaceAll(';', ';\n');
+                code = code.replaceAll(/;(?=(?:(?:[^"]*"){2})*[^"]*$)/g, ';\n');
+
+                //code = code.replaceAll(/([=+])/g, ' $1 ');
+                // /((?:[^\\]|^)(?:\\{2})*(?:"[^"\\]*(?:\\[^][^"\\]*)*"|'[^'\\]*(?:\\[^][^'\\]*)*'))    |( *)    ([,;+-/:={}<>\(\)])( *)/g,
+                //code = code.replaceAll(/(?!\\B"[^"]*)(?!\\B\'[^\']*)([=+])(?![^\']*\'\\B)(?![^"]*"\\B)/g, ' $1 ');
+                //code = code.replaceAll(/([=+-])(?=(?:(?:[^"]*"){2})*[^"]*$)/g, ' $1 ');
+
+                code = code.replaceAll('if(', 'if (');
+
+                code = code.replaceAll(/,([^ ])/g, ', $1');
+
+                //code = code.replaceAll(/[^\n]}/g, '\n}');
+
+                code = code.replaceAll('\n\n', '\n');
+                code = code.replaceAll('}\n;', '};');
+
+                code = code.trim();
+                if (code.charAt(code.length-1) != ";" && code.charAt(code.length-1) != "}")
+                    code += ';';
+
+                editor.setValue(code);
+                editor.autoIndent();
+                input_name.value = data.title;
+                update_bookmark();
+            });
+            break;
+        }
+    }
+});
+
+input_icon.addEventListener('dragenter', function(e){
+    preventDefaults(e);
+    this.classList.add('highlight');
+});
+
+input_icon.addEventListener('dragleave', function(e){
+    preventDefaults(e);
+    this.classList.remove('highlight');
+});
+
+input_icon.addEventListener('dragover', function(e){
+    preventDefaults(e);
+    this.classList.add('highlight');
+});
+
+input_icon.addEventListener('drop', function(e){
+    preventDefaults(e);
+    this.classList.remove('highlight');
+    let file = e.dataTransfer.files[0];
+    if (file && ['image/x-icon', 'image/png', 'image/jpeg', 'image/jpg'].includes(file.type))
+    {
+        let fileReader = new FileReader();
+        fileReader.readAsDataURL(file);
+        fileReader.onload = () => {
+            input_icon.value = fileReader.result;
+        };
+    }
+}, false);
+
+update_bookmark();
+</script>
+</body>
+</html>
