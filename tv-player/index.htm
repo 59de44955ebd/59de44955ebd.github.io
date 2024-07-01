@@ -109,7 +109,13 @@ fetch('https://mediathekviewweb.de/api/query?query=' + encodeURIComponent(JSON.s
     });
 	for (let track of tracks)
 	{
-		channel_select.add(new Option(track.title.replace(' Livestream', ''), track.url_video.replace('http://', 'https://')));
+		// DW deutsch scheint aktuell gar nicht per HLS verfügbar zu sein?
+		if (track.title.startsWith('DW '))
+		{
+			channel_select.add(new Option('DW (Englisch)', 'https://dwamdstream102.akamaized.net/hls/live/2015525/dwstream102/index.m3u8'));
+		}
+		else
+			channel_select.add(new Option(track.title.replace(' Livestream', ''), track.url_video.replace('http://', 'https://')));
 	}
 });
 </script>
