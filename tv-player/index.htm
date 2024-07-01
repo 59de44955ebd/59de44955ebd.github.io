@@ -48,14 +48,14 @@ select::-webkit-scrollbar-thumb {
 	z-index: 9999;
 }
 .vjs-big-play-button {
-	display: none !important;
+	visibility: hidden;
 }
 </style>
 </head>
 <body>
 <video-js id="my-player" class="vjs-default-skin" controls></video-js>
 <select id="channel"><option value="">-- Sender --</option></select>
-<select id="quality"><option value="">-- Qualität --</option></select>
+<select id="quality"><option value="" selected>-- Qualität --</option></select>
 <script src="https://unpkg.com/video.js@8.12.0/dist/video.min.js"></script>
 <script>
 const channel_select = document.querySelector('#channel');
@@ -91,6 +91,7 @@ channel_select.onchange = function(){
 		player.getCache().selectedLanguage = { enabled: false };
 		player.src({src: this.value, type: 'application/x-mpegURL'});
 		player.play();
+		location.hash = '#' + encodeURIComponent(this[this.selectedIndex].innerText);
 	}
 }
 
@@ -115,6 +116,18 @@ fetch('https://mediathekviewweb.de/api/query?query=' + encodeURIComponent(JSON.s
 		}
 		else
 			channel_select.add(new Option(track.title.replace(' Livestream', ''), track.url_video.replace('http://', 'https://')));
+	}
+	if (location.hash)
+	{
+		const channel = decodeURIComponent(location.hash.substr(1));
+		const idx = [...channel_select.options].findIndex(option => option.text === channel);
+		if (idx > -1)
+		{
+			channel_select.selectedIndex = idx;
+			player.getCache().selectedLanguage = { enabled: false };
+			player.src({src: channel_select.options[idx].value, type: 'application/x-mpegURL'});
+			document.querySelector('.vjs-big-play-button').style.visibility = 'visible';
+		}
 	}
 });
 </script>
