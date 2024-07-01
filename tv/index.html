@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Livestreams deutscher TV-Sender</title>
+</head>
+<body>
+<script>
+fetch('https://mediathekviewweb.de/api/query?query=' + encodeURIComponent(JSON.stringify({
+	'queries': [
+		{'fields': ['topic'], 'query': 'Livestream'},
+		{'fields': ['title'], 'query': 'Livestream'}
+	],
+	'size': 100
+})))
+.then(res => res.json())
+.then(res => {
+	let tracks = res.result.results.filter((row) => row.topic == 'Livestream').sort(function(a, b) {
+        return ((a.title < b.title) ? -1 : ((a.title > b.title) ? 1 : 0));
+    });
+    document.write("<pre>#EXTM3U\r\n");
+	for (let track of tracks)
+	{
+		document.write('#EXTINF:0,' + track.title + "\r\n");
+		document.write(track.url_video + "\r\n");
+	}
+	document.write("</pre>\r\n");
+});
+</script>
+</body>
+</html>
