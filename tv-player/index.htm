@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Livestreams deutscher TV-Sender</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://vjs.zencdn.net/8.12.0/video-js.css" rel="stylesheet">
+<style>
+html, body {
+	width: 100%;
+	height: 100%;
+}
+body {
+	margin: 0;
+	background-color: black;
+}
+#my-player {
+	width: 100% !important;
+	height: 100% !important;
+}
+select {
+	background-color: #202020;
+	color: #ccc;
+	border: 1px solid #666;
+	border-radius: 4px;
+	font-size: 12px;
+}
+select::-webkit-scrollbar {
+	background-color: #202020;
+	width: 10px;
+}
+select::-webkit-scrollbar-thumb {
+	background: #666;
+}
+#channel {
+	position: absolute;
+	top: 15px;
+	right: 120px;
+	width: 150px;
+	z-index: 9999;
+}
+#quality {
+	position: absolute;
+	top: 15px;
+	right: 15px;
+	width: 95px;
+	z-index: 9999;
+}
+.vjs-big-play-button {
+	display: none !important;
+}
+</style>
+</head>
+<body>
+<video-js id="my-player" class="vjs-default-skin" controls></video-js>
+<select id="channel"><option value="">-- Sender --</option></select>
+<select id="quality"><option value="">-- Auto --</option></select>
+<script src="https://vjs.zencdn.net/8.12.0/video.min.js"></script>
+<script src="https://unpkg.com/@videojs/http-streaming@3.10.0/dist/videojs-http-streaming.min.js"></script>
+<script>
+const channel_select = document.querySelector('#channel');
+const quality_select = document.querySelector('#quality');
+const player = videojs('my-player');
+const levels = player.qualityLevels();
+
+levels.on('change', function() {
+	quality_select.length = 0;
+	let heights = [];
+	const current_id = levels[levels.selectedIndex].id;
+	for (let q of Array.from(levels).sort(function(a, b) {
+        return ((a.height > b.height) ? -1 : ((a.height < b.height) ? 1 : 0));
+    }))
+	{
+		if (heights.includes(q.height) && q.id != current_id)
+			continue;
+		quality_select.add(new Option(`${q.height}p ${q.frameRate}fps`, q.id, false, q.id ==current_id));
+		heights.push(q.height);
+	}
+});
+
+quality_select.onchange = function(){
+    for (let level of levels)
+    {
+    	level.enabled = this.value ? level.id == this.value : true;
+    }
+};
+
+channel_select.onchange = function(){
+	if (this.value)
+	{
+		player.getCache().selectedLanguage = { enabled: false };
+		player.src({src: this.value, type: 'application/x-mpegURL'});
+		player.play();
+	}
+}
+
+fetch('https://mediathekviewweb.de/api/query?query=' + encodeURIComponent(JSON.stringify({
+	'queries': [
+		{'fields': ['topic'], 'query': 'Livestream'},
+		{'fields': ['title'], 'query': 'Livestream'}
+	],
+	'size': 100
+})))
+.then(res => res.json())
+.then(res => {
+	let tracks = res.result.results.filter((row) => row.topic == 'Livestream' && !row.title.includes('ORF') && !row.title.includes('WDR Lokalzeit')).sort(function(a, b) {
+        return ((a.title < b.title) ? -1 : ((a.title > b.title) ? 1 : 0));
+    });
+	for (let track of tracks)
+	{
+		channel_select.add(new Option(track.title.replace(' Livestream', ''), track.url_video.replace('http://', 'https://')));
+	}
+});
+</script>
+</body>
+</html>
