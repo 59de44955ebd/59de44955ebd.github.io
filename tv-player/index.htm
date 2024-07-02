@@ -55,41 +55,37 @@ select::-webkit-scrollbar-thumb {
 </head>
 <body>
 <video-js id="my-player" class="vjs-default-skin" controls></video-js>
-<select id="channel"><option value="">-- Sender --</option></select>
-<select id="quality"><option value="" selected>-- Qualität --</option></select>
+<select id="channel"><option value="" selected disabled>-- Sender --</option></select>
+<select id="quality"><option value="" selected disabled>-- Qualität --</option></select>
 <script src="https://unpkg.com/video.js@8.12.0/dist/video.min.js"></script>
 <script>
 const channel_select = document.querySelector('#channel');
 const quality_select = document.querySelector('#quality');
 const player = videojs('my-player');
-const levels = player.qualityLevels();
+const quality_levels = player.qualityLevels();
 
-levels.on('change', function() {
+quality_levels.on('change', function(){
 	quality_select.length = 0;
-	let heights = [];
-	const current_id = levels[levels.selectedIndex].id;
-	for (let q of Array.from(levels).sort(function(a, b) {
-        return ((a.height > b.height) ? -1 : ((a.height < b.height) ? 1 : 0));
-    }))
+	quality_select.add(new Option('Auto', ''));
+	const current_level_id = quality_levels[quality_levels.selectedIndex].id;
+	for (let quality_level of Array.from(quality_levels).sort((a, b) => ((a.height > b.height) ? -1 : ((a.height < b.height) ? 1 : 0))))
 	{
-		if (heights.includes(q.height) && q.id != current_id)
-			continue;
-		quality_select.add(new Option(`${q.height}p ${q.frameRate}fps`, q.id, false, q.id ==current_id));
-		heights.push(q.height);
+		quality_select.add(new Option(`${quality_level.height}p ${quality_level.frameRate}fps`, quality_level.id, false, quality_level.id == current_level_id));
 	}
 });
 
 quality_select.onchange = function(){
-    for (let level of levels)
+    for (let quality_level of quality_levels)
     {
-    	level.enabled = this.value ? level.id == this.value : true;
+    	quality_level.enabled = this.value ? quality_level.id == this.value : true;
     }
 };
 
 channel_select.onchange = function(){
 	if (this.value)
 	{
-		player.getCache().selectedLanguage = { enabled: false };
+		// Turn off subtitles/captions per default, even if marked as "default" in .m3u8. User can still turn it on.
+		player.getCache().selectedLanguage = {enabled: false};
 		player.src({src: this.value, type: 'application/x-mpegURL'});
 		player.play();
 		location.hash = '#' + encodeURIComponent(this[this.selectedIndex].innerText);
@@ -105,27 +101,31 @@ fetch('https://mediathekviewweb.de/api/query?query=' + encodeURIComponent(JSON.s
 })))
 .then(res => res.json())
 .then(res => {
-	let tracks = res.result.results.filter((row) => row.topic == 'Livestream' && !row.title.includes('ORF') && !row.title.includes('WDR Lokalzeit')).sort(function(a, b) {
-        return ((a.title < b.title) ? -1 : ((a.title > b.title) ? 1 : 0));
-    });
-	for (let track of tracks)
+	// Sort by channel name and fllter out some either geoblocked or rather irrelevant stuff
+	const channels = res.result.results.filter((row) => row.topic == 'Livestream' && !row.title.includes('ORF') && !row.title.includes('WDR Lokalzeit')).sort((a, b) =>
+        ((a.title < b.title) ? -1 : ((a.title > b.title) ? 1 : 0)));
+	for (let channel of channels)
 	{
-		// DW deutsch scheint aktuell gar nicht per HLS verfügbar zu sein?
-		if (track.title.startsWith('DW '))
+		// 'DW (Deutsch)' currently not available via HLS at all?
+		// Instead of removing it completely, for now show 'DW (Englisch)' as hard-coded alternative.
+		if (channel.title.startsWith('DW '))
 		{
 			channel_select.add(new Option('DW (Englisch)', 'https://dwamdstream102.akamaized.net/hls/live/2015525/dwstream102/index.m3u8'));
 		}
 		else
-			channel_select.add(new Option(track.title.replace(' Livestream', ''), track.url_video.replace('http://', 'https://')));
+		{
+			channel_select.add(new Option(channel.title.replace(' Livestream', ''), channel.url_video.replace('http://', 'https://')));
+		}
 	}
+	// Support for direct channel access via bookmark with hash
 	if (location.hash)
 	{
-		const channel = decodeURIComponent(location.hash.substr(1));
-		const idx = [...channel_select.options].findIndex(option => option.text === channel);
+		const channel_name = decodeURIComponent(location.hash.substr(1));
+		const idx = [...channel_select.options].findIndex(option => option.text === channel_name);
 		if (idx > -1)
 		{
 			channel_select.selectedIndex = idx;
-			player.getCache().selectedLanguage = { enabled: false };
+			player.getCache().selectedLanguage = {enabled: false};
 			player.src({src: channel_select.options[idx].value, type: 'application/x-mpegURL'});
 			document.querySelector('.vjs-big-play-button').style.visibility = 'visible';
 		}
