@@ -22,7 +22,7 @@ body {
 }
 select {
 	background-color: #202020;
-	color: #ccc;
+	color: #999;
 	border: 1px solid #666;
 	border-radius: 4px;
 	font-size: 12px;
@@ -50,6 +50,20 @@ select::-webkit-scrollbar-thumb {
 }
 .vjs-big-play-button {
 	visibility: hidden;
+}
+@media (max-width: 1024px) {
+	#channel {
+		width: 22px;
+		background-color: transparent;
+		border: 1px solid #999;
+		right: 15px;
+	}
+	#quality {
+		display: none
+	}
+	option {
+		color: #000;
+	}
 }
 </style>
 </head>
