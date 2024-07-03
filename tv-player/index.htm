@@ -21,12 +21,16 @@ body {
 	height: 100% !important;
 }
 select {
-	background-color: #202020;
-	color: #999;
-	border: 1px solid #666;
+	background-color: transparent;
+	color: #e0e0e0;
+	border: 1px solid #e0e0e0;
 	border-radius: 4px;
 	font-size: 12px;
 }
+select:focus {
+	background-color: #202020;
+}
+
 select::-webkit-scrollbar {
 	background-color: #202020;
 	width: 8px;
@@ -36,27 +40,28 @@ select::-webkit-scrollbar-thumb {
 }
 #channel {
 	position: absolute;
-	top: 15px;
-	right: 120px;
+	top: 10px;
+	right: 115px;
 	width: 150px;
 	z-index: 9999;
 }
 #quality {
 	position: absolute;
-	top: 15px;
-	right: 15px;
+	top: 10px;
+	right: 10px;
 	width: 95px;
 	z-index: 9999;
 }
 .vjs-big-play-button {
 	visibility: hidden;
 }
+.vjs-control-bar {
+	background-color: rgba(0,0,0,.5) !important;
+}
 @media (max-width: 1024px) {
 	#channel {
 		width: 22px;
-		background-color: transparent;
-		border: 1px solid #999;
-		right: 15px;
+		right: 10px;
 	}
 	#quality {
 		display: none
@@ -89,6 +94,7 @@ quality_levels.on('change', function(){
 });
 
 quality_select.onchange = function(){
+	this.blur();
     for (let quality_level of quality_levels)
     {
     	quality_level.enabled = this.value ? quality_level.id == this.value : true;
@@ -96,6 +102,7 @@ quality_select.onchange = function(){
 };
 
 channel_select.onchange = function(){
+	this.blur();
 	if (this.value)
 	{
 		// Turn off subtitles/captions per default, even if marked as "default" in .m3u8. User can still turn it on.
@@ -117,7 +124,7 @@ fetch('https://mediathekviewweb.de/api/query?query=' + encodeURIComponent(JSON.s
 .then(res => {
 	// Sort by channel name and fllter out some either geoblocked or rather irrelevant stuff
 	const channels = res.result.results.filter((row) => row.topic == 'Livestream' && !row.title.includes('ORF') && !row.title.includes('WDR Lokalzeit')).sort((a, b) =>
-        ((a.title < b.title) ? -1 : ((a.title > b.title) ? 1 : 0)));
+        a.title.localeCompare(b.title));
 	for (let channel of channels)
 	{
 		// 'DW (Deutsch)' currently not available via HLS at all?
