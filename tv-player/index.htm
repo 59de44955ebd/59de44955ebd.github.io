@@ -27,10 +27,9 @@ select {
 	border-radius: 4px;
 	font-size: 12px;
 }
-select:focus {
+select:focus, select:hover {
 	background-color: #202020;
 }
-
 select::-webkit-scrollbar {
 	background-color: #202020;
 	width: 8px;
@@ -54,6 +53,10 @@ select::-webkit-scrollbar-thumb {
 }
 .vjs-big-play-button {
 	visibility: hidden;
+	background-color: rgba(30,30,30,.5) !important;
+}
+.vjs-big-play-button:hover {
+	background-color: #202020 !important;
 }
 .vjs-control-bar {
 	background-color: rgba(30,30,30,.5) !important;
