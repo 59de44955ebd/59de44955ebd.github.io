@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>mapswitcher</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link rel="icon" type="image/png" href="favicon.png">
+<style>
+body {
+	margin:0;
+	font-family: sans-serif;
+	font-size: 12px;
+	font-weight: 400;
+	line-height: 1.5;
+	color: #212529;
+	text-align: left;
+	background-color: #fff;
+}
+a {
+	color: #007bff;
+	text-decoration: none;
+	background-color: transparent;
+}
+a:hover {
+	color: #0056b3;
+	text-decoration: underline;
+}
+h1 {
+	margin-top: 0;
+	margin-bottom: .5rem;
+	font-family: inherit;
+	font-weight: 500;
+	font-size: 24px;
+	line-height: 1.2;
+}
+img {
+	padding: 0px 5px;
+	vertical-align: middle;
+}
+code {
+	display: block;
+	padding: 10px 0;
+}
+#location, #description{
+	font-size: small;
+}
+#maps {
+	margin-top: 20px;
+	display: table;
+}
+ul.submaps{
+	margin: 0px;
+	display: inline-block;
+	vertical-align: top;
+	white-space: nowrap;
+	padding: 0 10px 0 0;
+}
+ul.submaps li{
+	list-style: none;
+	margin: 5px;
+}
+ul.submaps li.title{
+	background-color: #eee;
+	font-weight: bold;
+	text-align: left;
+	padding-left: 5px;
+	margin-bottom: 10px;
+}
+#description {
+	display:none;
+}
+.text-light {
+	color: #f8f9fa;
+}
+.bg-primary {
+	background-color: #007bff;
+}
+.container-fluid {
+	padding-right: 15px;
+	padding-left: 15px;
+	margin-right: auto;
+	margin-left: auto;
+}
+@media screen and (max-width: 360px){
+	#maps {
+		display: block;
+	}
+	ul.submaps {
+		display: block;
+		padding: 0 10px 10px 0;
+		width: 100%;
+	}
+}
+</style>
+</head>
+<body>
+<div class="container-fluid bg-primary text-light">
+	<h1>mapswitcher</h1>
+</div>
+<div class="container-fluid alert-warning">
+	<div id="description">
+		<p>mapswitcher helps you to switch between map services, such as Google maps, OpenStreetMap, Bing map and so on. You can jump to another map service keeping the location and the zoom level</p>
+		First, add a bookmark (bookmarklet) to your browser: Drag following link to your bookmark bar: <a
+		href="javascript:(function(){window.open('https://59de44955ebd.github.io/mapswitcher/#'+location.href);})();">mapswitcher</a> or bookmark the following text:
+		<code>javascript:(function(){window.open('https://59de44955ebd.github.io/mapswitcher/#'+location.href);})();</code>
+	</div>
+</div>
+<div class="container-fluid bg-light">
+	<div id="location">
+		<div style="display:none"><i>URL: <span id="showurl"></span></i></div>
+		<div style="display:none"><i>Lat: <span id="lat"></span>, Lon: <span id="lon"></span>, Zoom: <span id="zoom"></span></i></div>
+		<div><i><span id="address"></span></i></div>
+	</div>
+	<span id="sorry"></span>
+</div>
+<div class="container-fluid bg-white">
+	<div id="results">
+		<div id="maps"></div>
+	</div>
+</div>
+<script src="proj4-partial.min.js"></script>
+<script src="maps.js"></script>
+<script>
+function sortByKey(data, key){
+	return data.sort(function(a, b)
+	{
+	  return a[key].toUpperCase().localeCompare(b[key].toUpperCase(), 'de-DE');
+	});
+}
+function groupBy(xs, key)
+{
+	return xs.reduce(function(rv, x)
+	{
+		(rv[x[key]] = rv[x[key]] || []).push(x);
+		return rv;
+	}, {});
+}
+function setAddress(lat, lon)
+{
+	var request = new XMLHttpRequest();
+	request.open('GET', 'https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lon + '&zoom=10&addressdetails=1', true);
+	request.responseType = 'json';
+	request.onload = function ()
+	{
+		if (this.response.display_name)
+		{
+			document.getElementById('address').innerHTML = 'Address: ' + this.response.display_name;
+			document.getElementById('address').style.display = 'block';
+		}
+		else
+			document.getElementById('address').style.display = 'none';
+	};
+	request.send();
+}
+function getLatLonZoom(url, maps)
+{
+	for (let map of maps)
+	{
+		if (map.hasOwnProperty('getLatLonZoom'))
+		{
+			let latlonzoom = map.getLatLonZoom(url);
+			if (latlonzoom) return latlonzoom;
+		}
+	}
+	return ;
+}
+let lat, lon, zoom;
+let elementUrl = document.getElementById('showurl');
+let prevUrls = location.href.match(/#(.*)$/);
+if (prevUrls && prevUrls[1] != 'about:blank')
+{
+	let prevUrl = prevUrls[1];
+	elementUrl.innerHTML = prevUrl;
+	let latlonzoom;
+	latlonzoom = getLatLonZoom(prevUrl, maps);
+	if (latlonzoom)
+	{
+		[lat, lon, zoom] = latlonzoom;
+	}
+	// support for nextcloud map's custom protocol "geo:<lat>,<lon>"
+	// geo%3A52.961384%2C13.451300 => geo:52.961384,13.451300
+	else if (decodeURIComponent(prevUrl).startsWith('geo:'))
+	{
+		let parts = decodeURIComponent(prevUrl).substring(4).split(',', 2);
+		[lat, lon, zoom] = [parseFloat(parts[0]), parseFloat(parts[1]), 14];
+	}
+	else
+	{
+		[lat, lon, zoom] = [0, 0, 4];
+		document.getElementById('sorry').innerHTML = 'Sorry, this URL is not supported. Sample links are shown here.';
+	}
+}
+else
+{
+	document.getElementById('description').style.display = 'block';
+	[lat, lon, zoom] = [0, 0, 4];
+	document.getElementById('sorry').innerHTML = '';
+}
+setAddress(lat,lon);
+document.getElementById('lat').innerHTML = lat;
+document.getElementById('lon').innerHTML = lon;
+document.getElementById('zoom').innerHTML = zoom;
+let columns = groupBy(maps, 'category');
+for (let key in columns)
+{
+	columns[key] = sortByKey(columns[key], 'name');
+}
+let maplist = "";
+let categories = Object.keys(columns).sort();
+for (let category of categories)
+{
+	maplist += '<ul class="submaps" id="' + category + '"><li class="title">' + category + '</li>';
+	let mapsublist = columns[category];
+	for (let map of mapsublist)
+	{
+		if (map.hasOwnProperty('getUrl'))
+		{
+			let tooltip = "";
+			if (map.hasOwnProperty('description')) tooltip = ' title="' + map.description + '" ';
+			maplist += '<li>' + '<img src="favicons/' + map.domain + '.png">' + '<a href="' + map.getUrl(lat,lon,zoom) + '" id="' + map.name + '"'+ tooltip + '>' + map.name + '</a></li>';
+		}
+	}
+	maplist += '</ul>';
+}
+document.getElementById('maps').innerHTML =  maplist;
+window.navigator.registerProtocolHandler('geo', location.href.split('#').shift() + '#%s', 'mapswitcher');
+</script>
+</body>
+</html>
