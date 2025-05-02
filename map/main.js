@@ -1,112 +1,18 @@
 'use strict';
 
 const BING_KEY = 'AqRX_rx3tLFIIRmRsW8ZY2iJfj84IxUPzesU36Fr-y8JROPionQJN82GwuP71SJ7';
-const HERE_KEY = 'ntjooxhxtB9vA0vznumOIytglteLGuFE91VaE56YOUk';
 const MAPBOX_KEY = 'pk.eyJ1IjoidnNsNDIiLCJhIjoiY2xha3o1ZmZ0MDA4ZDN2bXMzcnIweWhhcCJ9.IU5zt8kMIRsIhfKJWpgbgg';
 const MAPTILER_KEY = 'ppaPBnSs4o1IOGtXW8oI';
 const THUNDERFOREST_KEY = 'c6644d4c8d6f4bd18067c449f978a779';
 
-const cachable_layers = {
-	'OpenTopoMap': 'otm',
-	'OSM': 'osm',
-	'OpenCycleMap (Thunderforest)': 'opencyclemap',
-	'Outdoors (Thunderforest)': 'outdoors',
-	'Landscape (Thunderforest)': 'landscape',
-	'ÖPNVKarte': 'opnv',
-	'CycleOSM': 'cyclosm',
-	'Topographic Map France (IGN)': 'ign',
-	'IGN (France)': 'ign-aerial',
-	'Hiking (Waymarked Trails)': 'hiking',
-	'Cycling (Waymarked Trails)': 'cycling',
-	'OpenSeaMap': 'openseamap',
-};
-
 //######################################
-// satellite
+// road maps
 //######################################
-const base_maps = {
-
-    //######################################
-    // maps
-    //######################################
-
-    'OSM': L.tileLayer(
-        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-        {
-	        subdomains:['a', 'b', 'c'],
-	        maxNativeZoom: 19,
-	        maxZoom: 20, // https://wiki.openstreetmap.org/wiki/Zoom_levels
-	        attribution: '© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-	    }
-    ),
-
-    'Google Roadmap': L.tileLayer(
-        'http://{s}.google.com/vt/lyrs=r&x={x}&y={y}&z={z}',
-        {
-	        subdomains:['mt0', 'mt1', 'mt2', 'mt3'],
-	        maxZoom: 20,
-	        attribution: '© Google', // DUMMY
-	    }
-    ),
+const road_maps = {
 
     'Bing Roadmap': new L.BingLayer(BING_KEY, {
         imagerySet: 'RoadOnDemand'
     }),
-
-    'Yandex Roadmap': L.yandex({ type: 'map' }),
-
-    'OpenTopoMap': L.tileLayer(
-        'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
-        {
-	        subdomains:['a', 'b', 'c'],
-	        //maxZoom: 16,
-	        maxNativeZoom: 16,
-	        maxZoom: 20,
-	        attribution: 'Kartendaten: © <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>-Mitwirkende, SRTM | Kartendarstellung: © <a href="https://opentopomap.org/">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)',
-	    }
-    ),
-
-	'OpenCycleMap (Thunderforest)': L.tileLayer(
-	    'https://{s}.tile.thunderforest.com/cycle/{z}/{x}/{y}.png?apikey=' + THUNDERFOREST_KEY,
-	    {
-		    subdomains:['a', 'b', 'c'],
-	        //maxZoom: 19, ???
-	        maxNativeZoom: 19,
-	        maxZoom: 20,
-	        attribution: 'Maps © <a href="https://www.thunderforest.com/">Thunderforest</a>, Data © <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-	    }
-    ),
-
-    'Outdoors (Thunderforest)': L.tileLayer(
-    	'https://{s}.tile.thunderforest.com/outdoors/{z}/{x}/{y}.png?apikey=' + THUNDERFOREST_KEY,
-    	{
-	        subdomains:['a', 'b', 'c'],
-	        //maxZoom: 19, ???
-	        maxNativeZoom: 19,
-	        maxZoom: 20,
-	        attribution: 'Maps © <a href="https://www.thunderforest.com/">Thunderforest</a>, Data © <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-	    }
-    ),
-
-    'Landscape (Thunderforest)': L.tileLayer(
-    	'https://{s}.tile.thunderforest.com/landscape/{z}/{x}/{y}.png?apikey=' + THUNDERFOREST_KEY, {
-        subdomains:['a', 'b', 'c'],
-        //maxZoom: 19,
-        maxNativeZoom: 19,
-        maxZoom: 20,
-        attribution: 'Maps © <a href="https://www.thunderforest.com/">Thunderforest</a>, Data © <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    }),
-
-    'ÖPNVKarte': L.tileLayer(
-    	'https://tileserver.memomaps.de/tilegen/{z}/{x}/{y}.png',
-    	{
-	        //maxZoom: 19,
-	        maxNativeZoom: 19,
-	        maxZoom: 20,
-	        attribution:  'Map © <a href="https://memomaps.de/">MeMoMaps</a>, Data © <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-	    }
-    ),
-
 
     'CycleOSM': L.tileLayer(
     	'https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
@@ -119,44 +25,42 @@ const base_maps = {
 	    }
     ),
 
-    'Topographic Map France (IGN)': L.tileLayer(
-        'https://wxs.ign.fr/an7nvfzojv5wa96dsga5nk8w/geoportail/wmts?layer=GEOGRAPHICALGRIDSYSTEMS.MAPS.SCAN25TOUR.CV&style=normal&tilematrixset=PM&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image%2Fjpeg&TileMatrix={z}&TileCol={x}&TileRow={y}',
+    'Google Roadmap': L.tileLayer(
+        'http://{s}.google.com/vt/lyrs=r&x={x}&y={y}&z={z}',
+        {
+	        subdomains:['mt0', 'mt1', 'mt2', 'mt3'],
+	        maxZoom: 20,
+	        attribution: '© Google', // DUMMY
+	    }
+    ),
+
+    'IGN Topo France': L.tileLayer(
+		'https://data.geopf.fr/wmts?layer=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2&style=normal&tilematrixset=PM&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image%2Fpng&TileMatrix={z}&TileCol={x}&TileRow={y}',
         {
 	        //maxZoom: 16,
 	        maxNativeZoom: 16,
 	        maxZoom: 20,
-	        attribution:  'Données cartographiques © <a href="https://www.ign.fr/">IGN</a>',
+	        attribution:  'Données cartographiques Â© <a href="https://www.ign.fr/">IGN</a>',
 	    }
     ),
 
-    'Cadastral Map France (IGN)': L.tileLayer(
-        'https://wxs.ign.fr/an7nvfzojv5wa96dsga5nk8w/geoportail/wmts?layer=CADASTRALPARCELS.PARCELLAIRE_EXPRESS&style=PCI%20vecteur&tilematrixset=PM&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image%2Fpng&TileMatrix={z}&TileCol={x}&TileRow={y}',
-        {
-	        maxNativeZoom: 19, // actually: 16
+	'IGN Topo Spain': L.tileLayer(
+		'https://ign.es/wmts/mapa-raster?layer=MTN&style=default&tilematrixset=GoogleMapsCompatible&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image/jpeg&&TileMatrix={z}&TileCol={x}&TileRow={y}',
+		{
+	        maxNativeZoom: 18,
 	        maxZoom: 20,
-	        attribution: 'Données cartographiques © <a href="https://www.economie.gouv.fr/dgfip">DGFiP</a> © <a href="https://www.ign.fr/">IGN</a>',
+	        //minNativeZoom: 15,
 	    }
-    ),
+	),
 
-    'HERE Roadmap': L.tileLayer(
-        'https://{s}.base.maps.ls.hereapi.com/maptile/2.1/maptile/newest/normal.day/{z}/{x}/{y}/256/jpg?apiKey=' + HERE_KEY,
-        {
-	        subdomains:['1', '2', '3', '4'],
-	        maxNativeZoom: 19,
-	        maxZoom: 20,
-	        attribution: 'Map Tiles © <a href="https://developer.here.com/" target="_blank">HERE</a>'
-	    }
-    ),
-
-    'HERE (Transit)': L.tileLayer(
-        'https://{s}.base.maps.ls.hereapi.com/maptile/2.1/maptile/newest/normal.day.transit/{z}/{x}/{y}/256/jpg?apiKey=' + HERE_KEY,
-        {
-	        subdomains:['1', '2', '3', '4'],
-	        maxNativeZoom: 19,
-	        maxZoom: 20,
-	        attribution: 'Map Tiles © <a href="https://developer.here.com/" target="_blank">HERE</a>'
-	    }
-    ),
+    'Landscape': L.tileLayer(
+    	'https://{s}.tile.thunderforest.com/landscape/{z}/{x}/{y}.png?apikey=' + THUNDERFOREST_KEY, {
+        subdomains:['a', 'b', 'c'],
+        //maxZoom: 19,
+        maxNativeZoom: 19,
+        maxZoom: 20,
+        attribution: 'Maps © <a href="https://www.thunderforest.com/">Thunderforest</a>, Data © <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    }),
 
     'MapQuest Roadmap': L.tileLayer(
         'https://{s}.tiles.mapquest.com/render/latest/vivid/{z}/{x}/{y}/256/png', {
@@ -166,9 +70,81 @@ const base_maps = {
 	    }
     ),
 
-    //######################################
-    // satellite footage
-    //######################################
+    'ÖPNVKarte': L.tileLayer(
+    	'https://tileserver.memomaps.de/tilegen/{z}/{x}/{y}.png',
+    	{
+	        //maxZoom: 19,
+	        maxNativeZoom: 19,
+	        maxZoom: 20,
+	        attribution:  'Map © <a href="https://memomaps.de/">MeMoMaps</a>, Data © <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+	    }
+    ),
+
+	'OpenCycleMap': L.tileLayer(
+	    'https://{s}.tile.thunderforest.com/cycle/{z}/{x}/{y}.png?apikey=' + THUNDERFOREST_KEY,
+	    {
+		    subdomains:['a', 'b', 'c'],
+	        //maxZoom: 19, ???
+	        maxNativeZoom: 19,
+	        maxZoom: 20,
+	        attribution: 'Maps © <a href="https://www.thunderforest.com/">Thunderforest</a>, Data © <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+	    }
+    ),
+
+    'OpenStreetMap': L.tileLayer(
+        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        {
+	        subdomains:['a', 'b', 'c'],
+	        maxNativeZoom: 19,
+	        maxZoom: 20, // https://wiki.openstreetmap.org/wiki/Zoom_levels
+	        attribution: '© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+	    }
+    ),
+
+    'OpenTopoMap': L.tileLayer(
+        'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+        {
+	        subdomains:['a', 'b', 'c'],
+	        //maxZoom: 16,
+	        maxNativeZoom: 16,
+	        maxZoom: 20,
+	        attribution: 'Kartendaten: © <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>-Mitwirkende, SRTM | Kartendarstellung: © <a href="https://opentopomap.org/">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)',
+	    }
+    ),
+
+    'Outdoors': L.tileLayer(
+    	'https://{s}.tile.thunderforest.com/outdoors/{z}/{x}/{y}.png?apikey=' + THUNDERFOREST_KEY,
+    	{
+	        subdomains:['a', 'b', 'c'],
+	        //maxZoom: 19, ???
+	        maxNativeZoom: 19,
+	        maxZoom: 20,
+	        attribution: 'Maps © <a href="https://www.thunderforest.com/">Thunderforest</a>, Data © <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+	    }
+    ),
+
+    'Yandex Roadmap': L.yandex({ type: 'map' }),
+
+};
+
+//######################################
+// satellite footage
+//######################################
+const sat_maps = {
+
+    'Bing': new L.BingLayer(BING_KEY,
+	    {
+	        imagerySet: 'Aerial',
+	        maxZoom: 20,
+	    }
+    ),
+
+    'Bing (labels)': new L.BingLayer(BING_KEY,
+	    {
+	        imagerySet: 'AerialWithLabels',
+	        maxZoom: 20,
+	    }
+    ),
 
     'Google': L.tileLayer(
         'http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
@@ -179,7 +155,7 @@ const base_maps = {
 	    }
     ),
 
-    'Google (with labels)': L.tileLayer(
+    'Google (labels)': L.tileLayer(
         'http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}',
         {
 	        maxZoom: 20,
@@ -188,19 +164,14 @@ const base_maps = {
 	    }
     ),
 
-    'Bing': new L.BingLayer(BING_KEY,
-	    {
-	        imagerySet: 'Aerial',
-	        maxZoom: 20,
-	    }
-    ),
-
-    'Bing (with labels)': new L.BingLayer(BING_KEY,
-	    {
-	        imagerySet: 'AerialWithLabels',
-	        maxZoom: 20,
-	    }
-    ),
+//    'IGN (France)': L.tileLayer(
+//        'https://wxs.ign.fr/an7nvfzojv5wa96dsga5nk8w/geoportail/wmts?layer=ORTHOIMAGERY.ORTHOPHOTOS&style=normal&tilematrixset=PM&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image%2Fjpeg&TileMatrix={z}&TileCol={x}&TileRow={y}',
+//        {
+//	        maxNativeZoom: 19,
+//	        maxZoom: 20,
+//	        attribution: 'Données cartographiques © <a href="https://www.ign.fr/">IGN</a>',
+//	    }
+//    ),
 
     'Mapbox': L.tileLayer(
         'https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}.jpg?access_token=' + MAPBOX_KEY,
@@ -211,7 +182,7 @@ const base_maps = {
 	    }
     ),
 
-    'Mapbox (with labels)': L.tileLayer(
+    'Mapbox (labels)': L.tileLayer(
         'https://api.mapbox.com/styles/v1/mapbox/satellite-streets-v11/tiles/{z}/{x}/{y}?access_token=' + MAPBOX_KEY,
         {
 	        maxZoom: 20,
@@ -219,53 +190,6 @@ const base_maps = {
 	        zoomOffset: -1,
 	        attribution: '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a>',
 	        //logo: 'mapbox-logo-white.png', //TODO
-	    }
-    ),
-
-    'Yandex': L.yandex({
-    	type: 'satellite',
-//    	maxNativeZoom: 18,
-//    	maxZoom: 20,
-    }),
-
-    'Yandex (with labels)': L.yandex({
-    	type: 'hybrid',
-//    	maxNativeZoom: 18,
-//    	maxZoom: 20,
-    }),
-
-    'MapTiler': L.tileLayer(
-        'https://api.maptiler.com/tiles/satellite-v2/{z}/{x}/{y}.jpg?key=' + MAPTILER_KEY,
-        {
-	        maxZoom: 21,
-	        attribution: '© <a href="https://www.maptiler.com/copyright/">MapTiler</a>'
-	    }
-    ),
-
-    'HERE': L.tileLayer(
-        'https://{s}.aerial.maps.ls.hereapi.com/maptile/2.1/maptile/newest/satellite.day/{z}/{x}/{y}/256/jpg?apiKey=' + HERE_KEY,
-        {
-	        subdomains:['1', '2', '3', '4'],
-	        maxZoom: 20,
-	        attribution: 'Map Tiles © <a href="https://developer.here.com/" target="_blank">HERE</a>'
-	    }
-    ),
-
-    'HERE (with labels)': L.tileLayer(
-        'https://{s}.aerial.maps.ls.hereapi.com/maptile/2.1/maptile/newest/hybrid.day/{z}/{x}/{y}/256/jpg?apiKey=' + HERE_KEY,
-        {
-	        subdomains:['1', '2', '3', '4'],
-	        maxZoom: 20,
-	        attribution: 'Map Tiles © <a href="https://developer.here.com/" target="_blank">HERE</a>'
-	    }
-    ),
-
-    'IGN (France)': L.tileLayer(
-        'https://wxs.ign.fr/an7nvfzojv5wa96dsga5nk8w/geoportail/wmts?layer=ORTHOIMAGERY.ORTHOPHOTOS&style=normal&tilematrixset=PM&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image%2Fjpeg&TileMatrix={z}&TileCol={x}&TileRow={y}',
-        {
-	        maxNativeZoom: 19,
-	        maxZoom: 20,
-	        attribution: 'Données cartographiques © <a href="https://www.ign.fr/">IGN</a>',
 	    }
     ),
 
@@ -277,29 +201,40 @@ const base_maps = {
 	        attribution: '© 2022 MapQuest | <a href="https://hello.mapquest.com/terms-of-use">Terms</a>',
 	    }
     ),
+
+    'MapTiler': L.tileLayer(
+        'https://api.maptiler.com/tiles/satellite-v2/{z}/{x}/{y}.jpg?key=' + MAPTILER_KEY,
+        {
+	        maxZoom: 21,
+	        attribution: '© <a href="https://www.maptiler.com/copyright/">MapTiler</a>'
+	    }
+    ),
+
+    'Yandex': L.yandex({
+    	type: 'satellite',
+//    	maxNativeZoom: 18,
+//    	maxZoom: 20,
+    }),
+
+    'Yandex (labels)': L.yandex({
+    	type: 'hybrid',
+//    	maxNativeZoom: 18,
+//    	maxZoom: 20,
+    }),
 };
 
+const base_maps = {...road_maps, ...sat_maps};
+
+//######################################
+// overlays
+//######################################
 const overlay_maps = {
 
-    'Hiking (Waymarked Trails)': L.tileLayer(
-        'https://tile.waymarkedtrails.org/hiking/{z}/{x}/{y}.png',
-        {
-	        maxNativeZoom: 16, // 18
-	        maxZoom: 20,
-	    }
-    ),
+    'Commons': L.commonsPhotos(),
 
-    'Cycling (Waymarked Trails)': L.tileLayer(
+    'Cycling': L.tileLayer(
         'https://tile.waymarkedtrails.org/cycling/{z}/{x}/{y}.png',
         {
-	        maxNativeZoom: 16,
-	        maxZoom: 20,
-	    }
-    ),
-
-    'OpenSeaMap': L.tileLayer(
-    	'https://t1.openseamap.org/seamark/{z}/{x}/{y}.png',
-    	{
 	        maxNativeZoom: 16,
 	        maxZoom: 20,
 	    }
@@ -313,10 +248,24 @@ const overlay_maps = {
 	    }
     ),
 
-    'Wikimedia Commons': L.commonsPhotos(),
+    'Hiking': L.tileLayer(
+        'https://tile.waymarkedtrails.org/hiking/{z}/{x}/{y}.png',
+        {
+	        maxNativeZoom: 16, // 18
+	        maxZoom: 20,
+	    }
+    ),
+
+    'OpenSeaMap': L.tileLayer(
+    	'https://t1.openseamap.org/seamark/{z}/{x}/{y}.png',
+    	{
+	        maxNativeZoom: 16,
+	        maxZoom: 20,
+	    }
+    ),
 };
 
-let base = 'OSM', overlay = '';
+let base = 'OpenStreetMap', overlay = '';
 let zoom, lat, lng;
 
 if (window.location.hash.startsWith('#map='))
@@ -386,26 +335,9 @@ L.control.locate({
 if (overlay)
     overlay_maps[overlay].addTo(map);
 
-const shades = new L.LeafletShades();
-
 // only if HTML5 FileReader is supported, add elevation and filelayer plugins
 if (window.FileReader)
 {
-	// Elevation
-//	var elonmap = false;
-//
-//	const el = L.control.elevation({
-//		position:"bottomright",
-//		theme: "red-theme",
-////		margins: {
-////        	top: 10,
-////        	right: 25,
-////        	bottom: 25,
-////        	left: 50
-////    	}
-//	});
-//	el.addTo(map);
-
 	// FileLayer
 	const style = {color: '#ee0033', opacity: 0.6, weight: 3, clickable: false};
 	L.Control.FileLayerLoad.LABEL = 'gpx';
@@ -426,32 +358,38 @@ if (window.FileReader)
 	});
 }
 
-map.on('moveend', function(evt) {
+function _mapChanged()
+{
     const p = map.getCenter()
     window.location.hash = `map=${map.getZoom()}/${p.lat}/${p.lng}/${base}/${overlay}`;
+	if (window.mapChanged)
+    	window.mapChanged(map.getZoom(), p.lat, p.lng, base, overlay);
+}
+
+map.on('moveend', function(evt) {
+	_mapChanged();
 });
 
 map.on('baselayerchange', function(evt) {
     base = evt.name;
-    const p = map.getCenter()
-    window.location.hash = `map=${map.getZoom()}/${p.lat}/${p.lng}/${base}/${overlay}`;
+    _mapChanged();
 });
 
 map.on('overlayadd', function(evt) {
     overlay = evt.name;
-    const p = map.getCenter()
-    window.location.hash = `map=${map.getZoom()}/${p.lat}/${p.lng}/${base}/${overlay}`;
+    _mapChanged();
 });
 
 map.on('overlayremove', function(evt) {
     overlay = '';
-    const p = map.getCenter()
-    window.location.hash = `map=${map.getZoom()}/${p.lat}/${p.lng}/${base}/${overlay}`;
+    _mapChanged();
 });
+
+_mapChanged();
 
 // add separator after sat maps
 document.querySelector('.leaflet-control-layers-base label:nth-child(1)').classList.add('heading-road');
-document.querySelector('.leaflet-control-layers-base label:nth-child(16)').classList.add('heading-sat');
+document.querySelector(`.leaflet-control-layers-base label:nth-child(${Object.keys(road_maps).length + 1})`).classList.add('heading-sat');
 
 // allow toggling overlay with space key
 let last_overlay = null, space_toggled = false, rect = null;
