@@ -217,7 +217,7 @@ for (let category of categories)
 		{
 			let tooltip = "";
 			if (map.hasOwnProperty('description')) tooltip = ' title="' + map.description + '" ';
-			maplist += '<li>' + '<img src="favicons/' + map.domain + '.png">' + '<a href="' + map.getUrl(lat,lon,zoom) + '" id="' + map.name + '"'+ tooltip + '>' + map.name + '</a></li>';
+			maplist += '<li>' + '<img src="favicons/' + map.domain + '.png">' + '<a target="_blank" href="' + map.getUrl(lat,lon,zoom) + '" id="' + map.name + '"'+ tooltip + '>' + map.name + '</a></li>';
 		}
 	}
 	maplist += '</ul>';

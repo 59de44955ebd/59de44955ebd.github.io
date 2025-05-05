@@ -248,6 +248,14 @@ const overlay_maps = {
 	    }
     ),
 
+	'Google Streetview': L.gridLayer.googleMutant({
+		type: null,
+		styles: [],
+		minZoom: 14,
+	})
+	.on('add', (evt) => evt.target._map._container.classList.toggle('streetview', true))
+	.on('remove', (evt) => evt.target._map._container.classList.toggle('streetview', false)),
+
     'Hiking': L.tileLayer(
         'https://tile.waymarkedtrails.org/hiking/{z}/{x}/{y}.png',
         {
@@ -263,7 +271,11 @@ const overlay_maps = {
 	        maxZoom: 20,
 	    }
     ),
+
 };
+
+overlay_maps['Google Streetview'].addGoogleLayer('StreetViewCoverageLayer');
+
 
 let base = 'OpenStreetMap', overlay = '';
 let zoom, lat, lng;
@@ -308,7 +320,15 @@ const map = L.map('map', {
     layers: [base_maps[base]],
     fullscreenControl: {position: 'topright'}, // https://github.com/Leaflet/Leaflet.fullscreen
     wheelPxPerZoomLevel: 240,
-}).setView([lat, lng], zoom);
+})
+.on('click', function(evt) {
+	if (overlay == 'Google Streetview')
+	{
+		const u = `https://maps.google.com/maps?q=&layer=c&cbll=${evt.latlng.lat},${evt.latlng.lng}&cbp=11,0,0,0,0`;
+		window.open(u, 'streetview');
+	}
+})
+.setView([lat, lng], zoom);
 
 L.control.layers(base_maps, overlay_maps, {position: 'topleft'}).addTo(map);
 
@@ -362,8 +382,8 @@ function _mapChanged()
 {
     const p = map.getCenter()
     window.location.hash = `map=${map.getZoom()}/${p.lat}/${p.lng}/${base}/${overlay}`;
-	if (window.mapChanged)
-    	window.mapChanged(map.getZoom(), p.lat, p.lng, base, overlay);
+	if (window.OnMapChanged)
+    	window.OnMapChanged(map.getZoom(), p.lat, p.lng, base, overlay);
 }
 
 map.on('moveend', function(evt) {

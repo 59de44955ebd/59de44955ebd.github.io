@@ -5,6 +5,7 @@ body,
 	width: 100%;
 	margin: 0;
 	padding: 0;
+	background-color: #000000;
 }
 
 .leaflet-control-zoom:first-child {
@@ -194,4 +195,7 @@ body,
 
 .leaflet-control-layers-overlays::before {
     content: 'Overlays';
+}
+.streetview {
+	cursor: pointer;
 }

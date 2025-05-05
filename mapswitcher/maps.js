@@ -56,6 +56,15 @@ const maps = [
 	},
 },
 {
+	name: "Google Streetview",
+	category: MAIN_CATEGORY,
+	default_check: true,
+	domain: "maps.google.com",
+	getUrl(lat, lon, zoom) {
+		return `https://maps.google.com/maps?q=&layer=c&cbll=${lat},${lon}&cbp=11,0,0,0,0`;
+	},
+},
+{
 	name: "OpenTopoMap",
 	category: MAIN_CATEGORY,
 	default_check: true,
@@ -316,6 +325,44 @@ const maps = [
 		return 'https://www.geoportail.gouv.fr/carte?c=' + lon + ',' + lat + '&z=' + zoom + '&l0=GEOGRAPHICALGRIDSYSTEMS.MAPS.SCAN25TOUR.CV::GEOPORTAIL:OGC:WMTS(1)&permalink=yes';
 	},
 },
+{
+	name: "IGN Spain",
+	category: LOCAL_CATEGORY,
+	default_check: false,
+	domain: "www.ign.es",
+	getUrl(lat, lon, zoom) {
+		return `https://www.ign.es/iberpix/visor?center=${lon},${lat}&zoom=${zoom}&srs=EPSG:4326`;
+	},
+},
+
+//	'ign-fr': {
+//		type: 'roadmap',
+//		title: 'IGN Topo France',
+//	    url:    'https://wxs.ign.fr/an7nvfzojv5wa96dsga5nk8w/geoportail/wmts?layer=GEOGRAPHICALGRIDSYSTEMS.MAPS.SCAN25TOUR.CV&style=normal&tilematrixset=PM&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image%2Fjpeg&TileMatrix={z}&TileCol={x}&TileRow={y}',
+//		options: {
+//	        maxNativeZoom: 15, // actually: 16
+//	        maxZoom: 20,
+//	        //minNativeZoom: 15,
+//	    },
+//		ext: 'jpg',
+//	},
+//
+//	'ign-es': {
+//		type: 'roadmap',
+//		title: 'IGN Topo Spain',
+//	    url:    'https://ign.es/wmts/mapa-raster?layer=MTN&style=default&tilematrixset=GoogleMapsCompatible&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image/jpeg&&TileMatrix={z}&TileCol={x}&TileRow={y}',
+//		options: {
+//	        maxNativeZoom: 20, // actually: 16
+//	        maxZoom: 20,
+//	        //minNativeZoom: 15,
+//	    },
+//		ext: 'jpg',
+//	},
+//
+//https://www.ign.es/iberpix/visor?center=-401526.7568730762,4942898.566190973&zoom=10&srs=EPSG:3857
+//<iframe width="800" height="600" frameborder="0" style="border:0" src="https://www.ign.es/iberpix/visor?center=-401526.7568730762,4942898.566190973&zoom=10"></iframe>
+
+
 {
 	name: "Satellite Tracker 3D",
 	category: SPECIAL_CATEGORY,
