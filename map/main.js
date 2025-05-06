@@ -123,7 +123,7 @@ const road_maps = {
 	    }
     ),
 
-    'Yandex Roadmap': L.yandex({ type: 'map' }),
+//    'Yandex Roadmap': L.yandex({ type: 'map' }),
 
 };
 
@@ -164,15 +164,6 @@ const sat_maps = {
 	    }
     ),
 
-//    'IGN (France)': L.tileLayer(
-//        'https://wxs.ign.fr/an7nvfzojv5wa96dsga5nk8w/geoportail/wmts?layer=ORTHOIMAGERY.ORTHOPHOTOS&style=normal&tilematrixset=PM&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image%2Fjpeg&TileMatrix={z}&TileCol={x}&TileRow={y}',
-//        {
-//	        maxNativeZoom: 19,
-//	        maxZoom: 20,
-//	        attribution: 'Données cartographiques © <a href="https://www.ign.fr/">IGN</a>',
-//	    }
-//    ),
-
     'Mapbox': L.tileLayer(
         'https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}.jpg?access_token=' + MAPBOX_KEY,
         {
@@ -210,17 +201,17 @@ const sat_maps = {
 	    }
     ),
 
-    'Yandex': L.yandex({
-    	type: 'satellite',
-//    	maxNativeZoom: 18,
-//    	maxZoom: 20,
-    }),
-
-    'Yandex (labels)': L.yandex({
-    	type: 'hybrid',
-//    	maxNativeZoom: 18,
-//    	maxZoom: 20,
-    }),
+//    'Yandex': L.yandex({
+//    	type: 'satellite',
+////    	maxNativeZoom: 18,
+////    	maxZoom: 20,
+//    }),
+//
+//    'Yandex (labels)': L.yandex({
+//    	type: 'hybrid',
+////    	maxNativeZoom: 18,
+////    	maxZoom: 20,
+//    }),
 };
 
 const base_maps = {...road_maps, ...sat_maps};
@@ -251,7 +242,7 @@ const overlay_maps = {
 	'Google Streetview': L.gridLayer.googleMutant({
 		type: null,
 		styles: [],
-		minZoom: 14,
+		minZoom: 13,
 	})
 	.on('add', (evt) => evt.target._map._container.classList.toggle('streetview', true))
 	.on('remove', (evt) => evt.target._map._container.classList.toggle('streetview', false)),
