@@ -123,8 +123,6 @@ const road_maps = {
 	    }
     ),
 
-//    'Yandex Roadmap': L.yandex({ type: 'map' }),
-
 };
 
 //######################################
@@ -201,17 +199,6 @@ const sat_maps = {
 	    }
     ),
 
-//    'Yandex': L.yandex({
-//    	type: 'satellite',
-////    	maxNativeZoom: 18,
-////    	maxZoom: 20,
-//    }),
-//
-//    'Yandex (labels)': L.yandex({
-//    	type: 'hybrid',
-////    	maxNativeZoom: 18,
-////    	maxZoom: 20,
-//    }),
 };
 
 const base_maps = {...road_maps, ...sat_maps};
@@ -266,7 +253,6 @@ const overlay_maps = {
 };
 
 overlay_maps['Google Streetview'].addGoogleLayer('StreetViewCoverageLayer');
-
 
 let base = 'OpenStreetMap', overlay = '';
 let zoom, lat, lng;
@@ -338,6 +324,7 @@ map.addControl( new L.Control.Search({
 	minLength: 2,
 	zoom:10,
 }) );
+
 
 L.control.locate({
 	follow: true,
@@ -420,12 +407,5 @@ document.body.addEventListener("keydown", (evt) => {
 		}
 		else
 			last_overlay.addTo(map);
-	}
-
-	// g => open google sat in new tab (for streetview)
-	if (evt.keyCode == 71)
-	{
-    	const p = map.getCenter()
-    	window.open(`https://www.google.com/maps/@${p.lat},${p.lng},220m/data=!3m1!1e3`);
 	}
 });
