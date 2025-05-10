@@ -295,7 +295,7 @@ const map = L.map('map', {
 	editable: true,
 //    minZoom: 0,
     layers: [base_maps[base]],
-    fullscreenControl: {position: 'topright'}, // https://github.com/Leaflet/Leaflet.fullscreen
+//    fullscreenControl: {position: 'topright'}, // https://github.com/Leaflet/Leaflet.fullscreen
     wheelPxPerZoomLevel: 240,
 })
 .on('click', function(evt) {
