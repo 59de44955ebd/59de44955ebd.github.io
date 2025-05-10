@@ -313,6 +313,10 @@ L.control.scale().addTo(map);
 
 L.control.measure({position: 'topleft'}).addTo(map);
 
+const searchParams = new URLSearchParams(window.location.search);
+if (!searchParams.has('nofullscreen'))
+	map.addControl(new L.Control.Fullscreen({position: 'topright'}));
+
 map.addControl( new L.Control.Search({
 	url: 'https://nominatim.openstreetmap.org/search?format=json&accept-language=de-DE&q={s}',
 	jsonpParam: 'json_callback',
@@ -324,7 +328,6 @@ map.addControl( new L.Control.Search({
 	minLength: 2,
 	zoom:10,
 }) );
-
 
 L.control.locate({
 	follow: true,
