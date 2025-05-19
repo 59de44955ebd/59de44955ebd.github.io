@@ -22,9 +22,10 @@ let has_hiking = false;
 let has_cycling = false;
 
 const sidepanel = document.querySelector('.sidepanel');
-
-const div_hiking = document.querySelector('.sidepanel-content .hiking');
-const div_cycling = document.querySelector('.sidepanel-content .cycling');
+const div_hiking = sidepanel.querySelector('.sidepanel-content .hiking');
+const ul_hiking = div_hiking.querySelector('ul');
+const div_cycling = sidepanel.querySelector('.sidepanel-content .cycling');
+const ul_cycling = div_cycling.querySelector('ul');
 
 function get_bbox()
 {
@@ -60,7 +61,10 @@ function update_trails(flavor)
 				</button>
 			</li>`;
 		}
-		document.querySelector(`.sidepanel-content .${flavor} ul`).innerHTML = html;
+		if (flavor == '')
+			ul_hiking.innerHTML = html;
+		else
+			ul_cycling.innerHTML = html;
 	});
 }
 
@@ -85,11 +89,13 @@ map.on('overlayremove', function(e) {
 	{
 		has_hiking = false;
 		div_hiking.style.display = 'none';
+		ul_hiking.innerHTML = '';
 	}
 	else if(e.layer == lonviaCycling)
 	{
 		has_cycling = false;
 		div_cycling.style.display = 'none';
+		ul_cycling.innerHTML = '';
 	}
 	if (!has_hiking && !has_cycling)
 		sidepanel.style.display = 'none';
