@@ -29,16 +29,16 @@ const ul_cycling = div_cycling.querySelector('ul');
 
 function get_bbox()
 {
-	const bbox = map.getBounds();	
+	const bounds = map.getBounds();	
 	return [
-		...Object.values(L.CRS.EPSG3857.project(bbox._southWest)),
-		...Object.values(L.CRS.EPSG3857.project(bbox._northEast))
+		...Object.values(L.CRS.EPSG3857.project(bounds._southWest)),
+		...Object.values(L.CRS.EPSG3857.project(bounds._northEast))
 	].join(',');
 }
 
 function update_trails(flavor)
 {
-	var bbox = get_bbox();
+	const bbox = get_bbox();
 	fetch(`https://${flavor}.waymarkedtrails.org/api/v1/list/by_area?limit=20&bbox=${bbox}`)
 	.then(res => res.json())
 	.then(res => {
