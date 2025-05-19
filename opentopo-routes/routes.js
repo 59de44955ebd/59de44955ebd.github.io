@@ -1,17 +1,26 @@
+let _el_ = document.createElement("link");
+_el_.type = "text/css";
+_el_.rel = "stylesheet";
+_el_.href = "https://59de44955ebd.github.io/opentopo-routes/routes.css";
+document.head.appendChild(_el_);
 
-document.write(`<div class="sidepanel">
-	<div class="sidepanel-content">
-		<div class="sidepanel-page hiking">
-			<h3><span>Wanderrouten</span></h3>
-			<ul></ul>
-		</div>
-		<div class="sidepanel-page cycling">
-			<h3><span>Radrouten</span></h3>
-			<ul></ul>
-		</div>
+_el_ = document.createElement("script");
+_el_.src = "https://59de44955ebd.github.io/opentopo-routes/proj4.js";
+document.body.appendChild(_el_);
+
+_el_ = document.createElement("div");
+_el_.classList = 'sidepanel';
+_el_.innerHTML = `<div class="sidepanel-content">
+	<div class="sidepanel-page hiking">
+		<h3><span>Wanderrouten</span></h3>
+		<ul></ul>
 	</div>
-</div>`);
-
+	<div class="sidepanel-page cycling">
+		<h3><span>Radrouten</span></h3>
+		<ul></ul>
+	</div>
+</div>`;
+document.body.appendChild(_el_);
 
 let has_hiking = false;
 let has_cycling = false;
@@ -96,4 +105,3 @@ map.on('moveend', function(e) {
 	if (has_cycling)
 		update_trails('cycling');
 });
-
