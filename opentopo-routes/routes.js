@@ -4,10 +4,6 @@ _el_.rel = "stylesheet";
 _el_.href = "https://59de44955ebd.github.io/opentopo-routes/routes.css";
 document.head.appendChild(_el_);
 
-_el_ = document.createElement("script");
-_el_.src = "https://59de44955ebd.github.io/opentopo-routes/proj4.js";
-document.body.appendChild(_el_);
-
 _el_ = document.createElement("div");
 _el_.classList = 'sidepanel';
 _el_.innerHTML = `<div class="sidepanel-content">
@@ -32,10 +28,10 @@ const div_cycling = document.querySelector('.sidepanel-content .cycling');
 
 function get_bbox()
 {
-	const bbox = map.getBounds();
+	const bbox = map.getBounds();	
 	return [
-		...proj4('EPSG:4326', 'EPSG:3857').forward([bbox._southWest.lng, bbox._southWest.lat]),
-		...proj4('EPSG:4326', 'EPSG:3857').forward([bbox._northEast.lng, bbox._northEast.lat])
+		...Object.values(L.CRS.EPSG3857.project(bbox._southWest)),
+		...Object.values(L.CRS.EPSG3857.project(bbox._northEast))
 	].join(',');
 }
 
