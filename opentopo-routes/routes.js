@@ -61,7 +61,7 @@ function update_trails(flavor)
 				</button>
 			</li>`;
 		}
-		if (flavor == '')
+		if (flavor == 'hiking')
 			ul_hiking.innerHTML = html;
 		else
 			ul_cycling.innerHTML = html;
