@@ -306,7 +306,7 @@ const map = L.map('map', {
     wheelPxPerZoomLevel: 240,
 })
 .on('click', function(evt) {
-	if (overlay == 'Google Streetview')
+	if (overlays.includes('Google Streetview'))
 	{
 		const u = `https://maps.google.com/maps?q=&layer=c&cbll=${evt.latlng.lat},${evt.latlng.lng}&cbp=11,0,0,0,0`;
 		window.open(u, 'streetview');
@@ -443,23 +443,10 @@ document.querySelector(`.leaflet-control-layers-base label:nth-child(${Object.ke
 // allow toggling overlay with space key
 let last_overlay = null, space_toggled = false, rect = null;
 
-function deg_to_rad(deg) {
+function deg_to_rad(deg) 
+{
 	return deg * Math.PI / 180;
 }
-
-document.body.addEventListener("keydown", (evt) => {
-	if ((overlay || last_overlay) && evt.keyCode == 32)
-	{
-		space_toggled = !space_toggled;
-		if (space_toggled)
-		{
-			last_overlay = overlay_maps[overlay];
-			overlay_maps[overlay].remove();
-		}
-		else
-			last_overlay.addTo(map);
-	}
-});
 
 function get_bbox()
 {
