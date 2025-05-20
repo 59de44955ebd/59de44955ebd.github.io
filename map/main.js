@@ -122,7 +122,6 @@ const road_maps = {
 	        attribution: 'Maps © <a href="https://www.thunderforest.com/">Thunderforest</a>, Data © <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
 	    }
     ),
-
 };
 
 //######################################
@@ -254,8 +253,17 @@ const overlay_maps = {
 
 overlay_maps['Google Streetview'].addGoogleLayer('StreetViewCoverageLayer');
 
-let base = 'OpenStreetMap', overlay = '';
+let base = 'OpenStreetMap', overlays = [], overlays_start = null;
 let zoom, lat, lng;
+
+let has_hiking = false;
+let has_cycling = false;
+
+const sidepanel = document.querySelector('.sidepanel');
+const div_hiking = sidepanel.querySelector('.sidepanel-content .hiking');
+const ul_hiking = div_hiking.querySelector('ul');
+const div_cycling = sidepanel.querySelector('.sidepanel-content .cycling');
+const ul_cycling = div_cycling.querySelector('ul');
 
 if (window.location.hash.startsWith('#map='))
 {
@@ -271,11 +279,10 @@ if (window.location.hash.startsWith('#map='))
             if (base_maps[m])
                 base = m;
         }
-        if (parts.length > 4)
+        if (parts.length > 4 && parts[4])
         {
             const m = decodeURIComponent(parts[4]);
-            if (overlay_maps[m])
-                overlay = m;
+            overlays_start = m.split('|');
         }
     }
     catch(e){}
@@ -289,7 +296,7 @@ if (!lng)
     lng = 13.409671783447267;
 }
 
-window.location.hash = `map=${zoom}/${lat}/${lng}/${base}/${overlay}`;
+window.location.hash = `map=${zoom}/${lat}/${lng}/${base}/${overlays.join('|')}`;
 
 const map = L.map('map', {
 	editable: true,
@@ -333,9 +340,6 @@ L.control.locate({
 	follow: true,
 }).addTo(map);
 
-if (overlay)
-    overlay_maps[overlay].addTo(map);
-
 // only if HTML5 FileReader is supported, add elevation and filelayer plugins
 if (window.FileReader)
 {
@@ -362,12 +366,16 @@ if (window.FileReader)
 function _mapChanged()
 {
     const p = map.getCenter()
-    window.location.hash = `map=${map.getZoom()}/${p.lat}/${p.lng}/${base}/${overlay}`;
+    window.location.hash = `map=${map.getZoom()}/${p.lat}/${p.lng}/${base}/${overlays.join('|')}`;
 	if (window.OnMapChanged)
-    	window.OnMapChanged(map.getZoom(), p.lat, p.lng, base, overlay);
+    	window.OnMapChanged(map.getZoom(), p.lat, p.lng, base, overlays.join('|'));
 }
 
 map.on('moveend', function(evt) {
+	if (has_hiking)
+		update_trails('hiking');
+	if (has_cycling)
+		update_trails('cycling');
 	_mapChanged();
 });
 
@@ -377,14 +385,52 @@ map.on('baselayerchange', function(evt) {
 });
 
 map.on('overlayadd', function(evt) {
-    overlay = evt.name;
+    overlays.push(evt.name);
+
+	if (evt.name == 'Hiking')
+	{
+		has_hiking = true;
+		div_hiking.style.display = 'block';
+		update_trails('hiking');
+	}
+	else if (evt.name == 'Cycling')
+	{
+		has_cycling = true;
+		div_cycling.style.display = 'block';
+		update_trails('cycling');
+	}
+	if (has_hiking || has_cycling)
+		sidepanel.style.display = 'flex';
+	
     _mapChanged();
 });
 
 map.on('overlayremove', function(evt) {
-    overlay = '';
+	overlays.splice(overlays.indexOf(evt.name), 1);
+	
+	if (evt.name == 'Hiking')
+	{
+		has_hiking = false;
+		div_hiking.style.display = 'none';
+		ul_hiking.innerHTML = '';
+	}
+	else if (evt.name == 'Cycling')
+	{
+		has_cycling = false;
+		div_cycling.style.display = 'none';
+		ul_cycling.innerHTML = '';
+	}
+	if (!has_hiking && !has_cycling)
+		sidepanel.style.display = 'none';
+
     _mapChanged();
 });
+
+if (overlays_start)
+{
+	for (let overlay of overlays_start)
+    	overlay_maps[overlay].addTo(map);
+}
 
 _mapChanged();
 
@@ -412,3 +458,44 @@ document.body.addEventListener("keydown", (evt) => {
 			last_overlay.addTo(map);
 	}
 });
+
+function get_bbox()
+{
+	const bounds = map.getBounds();	
+	return [
+		...Object.values(L.CRS.EPSG3857.project(bounds._southWest)),
+		...Object.values(L.CRS.EPSG3857.project(bounds._northEast))
+	].join(',');
+}
+
+function update_trails(flavor)
+{
+	const bbox = get_bbox();
+	fetch(`https://${flavor}.waymarkedtrails.org/api/v1/list/by_area?limit=25&bbox=${bbox}`)
+	.then(res => res.json())
+	.then(res => {
+		let html = '';
+		for (const row of res.results)
+		{
+			if (!row.name)
+				continue;
+			html += `<li>
+				<button type="button">
+					<div class="route-symbol">
+						<img alt="route symbol" src="https://${flavor}.waymarkedtrails.org/api/v1/symbols/id/${row['symbol_id']}.svg">
+					</div>
+					<div class="main-info">
+						<div class="title-line">
+							<div class="route-title" title="${row.name}">${row.name}</div>
+							<div class="route-ref">${row.ref ? row.ref : ''}</div>
+						</div>
+					</div>
+				</button>
+			</li>`;
+		}
+		if (flavor == 'hiking')
+			ul_hiking.innerHTML = html;
+		else
+			ul_cycling.innerHTML = html;
+	});
+}
