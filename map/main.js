@@ -440,14 +440,6 @@ _mapChanged();
 document.querySelector('.leaflet-control-layers-base label:nth-child(1)').classList.add('heading-road');
 document.querySelector(`.leaflet-control-layers-base label:nth-child(${Object.keys(road_maps).length + 1})`).classList.add('heading-sat');
 
-// allow toggling overlay with space key
-let last_overlay = null, space_toggled = false, rect = null;
-
-function deg_to_rad(deg) 
-{
-	return deg * Math.PI / 180;
-}
-
 function get_bbox()
 {
 	const bounds = map.getBounds();	
