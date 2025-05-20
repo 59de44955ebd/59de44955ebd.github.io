@@ -323,7 +323,9 @@ L.control.measure({position: 'topleft'}).addTo(map);
 const searchParams = new URLSearchParams(window.location.search);
 if (!searchParams.has('nofullscreen'))
 	map.addControl(new L.Control.Fullscreen({position: 'topright'}));
-
+else
+	document.body.classList.add('nofullscreen');
+	
 map.addControl( new L.Control.Search({
 	url: 'https://nominatim.openstreetmap.org/search?format=json&accept-language=de-DE&q={s}',
 	jsonpParam: 'json_callback',
