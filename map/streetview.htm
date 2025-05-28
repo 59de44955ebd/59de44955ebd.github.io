@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Streetview</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" type="image/ico" href="favicon.ico">
+<!-- Google Maps API -->
+<!--
+<script async
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCt-iKtoOCPEyWa8pe0nMABxUXE7ofedvo&loading=async&callback=initMap">
+</script>
+-->
+<style>
+html {
+	height: 100%;
+	width: 100%;
+}
+body {
+	height: 100%;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	background-color: #2a2a2a;
+}
+#pano {
+	position:absolute;
+	width: 100%;
+	height: 100%;
+}
+#resizer {
+	position:absolute;
+	width: 100%;
+	height: 4px;
+	top: calc(80% - 2px);
+	background-color: #2a2a2a;
+	cursor: ns-resize;
+	z-index: 10000000;
+}
+#map {
+	position:absolute;
+	width: 100%;
+	height: calc(20% - 2px);
+	top: calc(80% + 2px);
+}
+
+#pano .gmnoprint:first-child,
+#pano .gmnoprint:nth-child(4)
+{
+	display: none !important;
+}
+
+/*
+.gm-style-cc,
+.gm-iv-address,
+.gmnoprint,
+*/
+
+/*
+.gmnoprint:first-child,
+.gmnoprint:nth-child(4),
+*/
+.gm-bundled-control-on-bottom,
+.gm-style-cc:nth-child(5),
+img[alt="Google"]
+{
+	display: none !important;
+}
+
+.gmnoprint button {
+	height: 20px !important;
+	font-size: 12px !important;
+}
+.gmnoprint li {
+	padding: 2px 5px !important;
+	font-size: 12px !important;
+}
+
+div.gm-style-cc {
+	line-height: 17px !important;
+}
+#map .gm-style-cc {
+	display: none;
+}
+/* disable pegman dragging */
+div[title] {
+	pointer-events: none !important;
+}
+</style>
+</head>
+<body>
+<div id="pano"></div>
+<script>
+const RESIZER_HALF_SIZE = 2;
+
+const panoDiv = document.getElementById('pano');
+const resizer = document.getElementById('resizer');
+
+let map, panorama, streetViewService, last_pos,
+	is_snapped = false,
+	is_initialized = false,
+	init_task;
+
+function init()
+{
+	panorama = new google.maps.StreetViewPanorama(panoDiv, {
+		addressControl: false,
+		fullscreenControl: false,
+		imageDateControl : true, // show date of images
+		linksControl: false, // < > arrows  on top of pano image
+		showRoadLabels: false, //street name overlays on top of pano image
+		zoomControl: false,
+
+		//clickToGo: true,
+	});
+
+//	map = new google.maps.Map(mapDiv, {
+//		//center: fenway,
+//		zoom: 14,
+////		mapTypeControl: false,
+//		fullscreenControl: false,
+//		zoomControl: false, // +/i
+//		clickableIcons: false,
+////		mapTypeControl: true,
+//		mapTypeId: 'terrain',
+//		streetView: panorama, // roadmap terrain satellite hybrid
+//	});
+//
+//	map.addListener('click', function(evt){
+////		console.log('click', evt.latLng);
+//		panorama.setPosition(evt.latLng);
+//	});
+//
+//	(new google.maps.StreetViewCoverageLayer()).setMap(map);
+
+	panorama.addListener('status_changed', function(evt){
+		const status = this.getStatus();
+//		console.log('status_changed', status);
+		if (status == google.maps.StreetViewStatus.OK)
+		{
+			panorama.setVisible(true);
+			last_pos = this.getPosition();
+		}
+		else
+		{
+			panorama.setPosition(last_pos);
+			panorama.setVisible(true);
+		}
+	});
+
+//	panorama.addListener('position_changed', function(evt){
+//		if (new_pov)
+//		{
+//			panorama.setPov(new_pov);
+//		}
+//	});
+
+	is_initialized = true;
+	if (init_task)
+		init_task();
+}
+
+//function resize(e)
+//{
+//	e.stopPropagation();
+//	// snap
+//	is_snapped = e.y > document.body.clientHeight - 80;
+//	let y = is_snapped ? document.body.clientHeight - 4 : e.y - RESIZER_HALF_SIZE;
+//	resizer.style.top = panoDiv.style.height = y + 'px';
+//	y += 2 * RESIZER_HALF_SIZE;
+//	mapDiv.style.top = y + 'px';
+//	mapDiv.style.height = `calc(100% - ${y}px)`;
+//}
+
+//resizer.addEventListener('mousedown', function(e){
+//	e.stopPropagation();
+//	if (is_snapped)
+//	{
+//		let y = document.body.clientHeight - 120;
+//		resizer.style.top = panoDiv.style.height = y + 'px';
+//		y += 2 * RESIZER_HALF_SIZE;
+//		mapDiv.style.top = y + 'px';
+//		mapDiv.style.height = `calc(100% - ${y}px)`;
+//		is_snapped = false;
+//		return;
+//	}
+//    document.addEventListener('mousemove', resize, false);
+//}, false);
+
+//document.addEventListener('mouseup', function(){
+//    document.removeEventListener('mousemove', resize, false);
+//}, false);
+
+function gotoLatLng(lat, lng, pov)
+{
+	console.log('gotoLatLng', lat, lng, pov);
+	init_task = function() {
+		const streetViewCoords = new google.maps.LatLng(lat, lng);
+//		map.setCenter(streetViewCoords);
+//		panorama.setVisible(false);
+		panorama.setPosition(streetViewCoords);
+		if (pov)
+			panorama.setPov(pov);
+//		panorama.setVisible(true);
+	};
+	if (is_initialized)
+		init_task();
+}
+
+//function gotoLatLng(lat, lng, pov)
+//{
+//	const streetViewCoords = new google.maps.LatLng(lat, lng);
+//	streetS.getPanorama({
+//	        location: placeLocation,
+//	        preference: google.maps.StreetViewPreference.BEST,
+//	        source: google.maps.StreetViewSource.OUTDOOR
+//	    },
+//		function(panoData, status){
+//			if (status === google.maps.StreetViewStatus.OK) {
+//				mapSV.setPosition(panoData.location.latLng);
+//				mapSV.setVisible(true);
+//			} else {
+//				//Handle other statuses here
+//				mapSV.setPosition(placeLocation);
+//				mapSV.setVisible(true);
+//			}
+//		}
+//	);
+//}
+
+function getLatLng()
+{
+	return JSON.stringify({
+		lat: panorama.location.latLng.lat(),
+		lng: panorama.location.latLng.lng(),
+		pov: panorama.pov
+	});
+}
+
+//gotoLatLng(45.726045479306805, 3.6852693557739262)
+</script>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCt-iKtoOCPEyWa8pe0nMABxUXE7ofedvo&loading=async&callback=init"></script>
+
+</body>
+</html>

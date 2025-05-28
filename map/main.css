@@ -204,9 +204,9 @@ body,
 .sidepanel {
 	font-family: Helvetica,Arial,sans-serif;
 	position: absolute;
-	top: 55px;
+	top: 10px;
 	height: unset;
-	max-height: calc(100% - 80px);
+	max-height: calc(100% - 35px);
 	right: 10px;
 	width: 18em;
 	max-width: 48%;
@@ -217,10 +217,6 @@ body,
 	z-index: 999;
 	display: flex;
 	flex-direction: column;
-}
-.nofullscreen .sidepanel {
-	top: 10px;
-	max-height: calc(100% - 35px);
 }
 .sidepanel-content {
 	overflow: auto;

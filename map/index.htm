@@ -10,8 +10,6 @@
 <script src="leaflet/leaflet.js"></script>
 <link href="leaflet/leaflet.css" rel="stylesheet">
 
-<script src="leaflet/Leaflet.fullscreen.min.js"></script>
-
 <script src="leaflet/leaflet-search.js"></script>
 <link href="leaflet/leaflet-search.css" rel="stylesheet">
 
@@ -38,9 +36,35 @@
 <script src="leaflet/leaflet.googlemutant.js"></script>
 
 <link rel="stylesheet" href="main.css">
+<style>
+
+#streetview {
+	resize: vertical;
+	overflow: auto;
+	display: flex;
+	position: absolute;
+	left: 50px;
+	top: 10px;
+	width: calc(100% - 100px);
+	height: 40%;
+	max-height: calc(100% - 20px);
+	z-index: 700;
+	display: none;
+}
+
+#streetview > * {
+	flex: 1;
+}
+
+#streetview iframe {
+	border: 1px solid black;
+}
+</style>
 </head>
 <body>
-<div id="map" class="map"></div>
+<div id="map" class="map">
+	
+</div>
 <div class="sidepanel">
 	<div class="sidepanel-content">
 		<div class="sidepanel-page hiking">
@@ -53,6 +77,7 @@
 		</div>
 	</div>
 </div>
+<div id="streetview"><iframe></iframe></div>
 <script src="main.js"></script>
 </body>
 </html>
