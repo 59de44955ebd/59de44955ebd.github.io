@@ -270,6 +270,7 @@ const ul_cycling = div_cycling.querySelector('ul');
 
 const div_streetview = document.querySelector('#streetview');
 const iframe_streetview = document.querySelector('#streetview iframe');
+const div_resizer = document.querySelector('#resizer');
 
 if (window.location.hash.startsWith('#map='))
 {
@@ -314,7 +315,7 @@ const map = L.map('map', {
 	{
 		if (!streetview_visible)
 		{
-			div_streetview.style.display = 'flex';
+			div_streetview.style.display = 'block';
 			streetview_visible = true;
 		}
 		iframe_streetview.contentWindow.gotoLatLng(evt.latlng.lat, evt.latlng.lng);
@@ -495,3 +496,23 @@ function update_trails(flavor)
 			ul_cycling.innerHTML = html;
 	});
 }
+
+function on_mousemove(event)
+{
+	div_streetview.style.height = `${event.clientY}px`;
+}
+
+function on_mouseup(event)
+{
+	iframe_streetview.style.display = 'block';
+	div_streetview.style.backgroundColor = 'unset';
+	document.removeEventListener('mousemove', on_mousemove);
+	document.removeEventListener('mouseup', on_mouseup);
+}
+
+div_resizer.addEventListener('mousedown', (event) => {
+	div_streetview.style.backgroundColor = '#333';
+	iframe_streetview.style.display = 'none';
+	document.addEventListener('mousemove', on_mousemove);
+	document.addEventListener('mouseup', on_mouseup);
+});

@@ -7,11 +7,9 @@ body,
 	padding: 0;
 	background-color: #000000;
 }
-
 .leaflet-control-zoom:first-child {
     display: none;
 }
-
 .leaflet-control-fullscreen,
 .leaflet-control-layers,
 .leaflet-control-search,
@@ -23,7 +21,6 @@ body,
     border: 1px solid rgba(0,0,0,0.4) !important;
     border-radius: 5px !important;
 }
-
 .leaflet-control-fullscreen:hover,
 .leaflet-control-search:hover,
 .leaflet-control-locate:hover,
@@ -32,7 +29,6 @@ body,
 {
     background-color: #f4f4f4 !important;
 }
-
 .leaflet-control-fullscreen a,
 .leaflet-control-layers a,
 .leaflet-control-search > a,
@@ -44,7 +40,6 @@ body,
     width: 30px !important;
     height: 30px !important;
 }
-
 .leaflet-control-fullscreen a:hover,
 .leaflet-control-layers a:hover,
 .leaflet-control-search > a:hover,
@@ -54,25 +49,19 @@ body,
 {
     background-color: unset !important;
 }
-
 /* layers control ********************************/
-
 .leaflet-control-layers-toggle {
     background-size: 20px 20px;
 }
-
 .leaflet-control-layers-list {
     user-select: none;
 }
-
 /* search control ********************************/
-
 .leaflet-control-search {
 	position: relative;
 	float: left;
 	color: #1978cf;
 	z-index: 1000;
-
 	margin-left: 10px;
 	margin-top: 10px;
 }
@@ -80,20 +69,17 @@ body,
 	box-shadow: 0 1px 7px #999;
 	background: #fff;
 }
-
 .leaflet-control-search .search-input {
 	display: block;
 	float: left;
 	background: #fff;
 	border: 1px solid #666;
 	border-radius: 2px;
-
     height: 20px;
     padding: 0 18px 0 2px;
     margin: 4px 0 4px 4px;
     width: 150px;
 }
-
 .leaflet-control-search .search-button,
 .leaflet-control-search .search-button:hover
 {
@@ -101,76 +87,31 @@ body,
     float:left;
     background: url('leaflet/images/search-icon.png') no-repeat 5px 5px;
 }
-
 /* locate control ********************************/
-
 .leaflet-bar-part-single {
 	border-radius: 4px;
 	border-bottom: none;
 }
-
 .leaflet-touch .leaflet-bar-part-single {
 	border-radius: 7px;
 	border-bottom: none;
 }
-
 .leaflet-control-locate a {
 	background-image: url('leaflet/images/locate.png');
 }
-
 .leaflet-control-locate.requesting a {
     background-image: url('leaflet/images/spinner.gif');
 }
-
 .leaflet-control-locate.active a {
     background-image: url('leaflet/images/locate_active.png');
 }
-
 /* scale control ********************************/
-
 .leaflet-control-scale-line {
     user-select: none;
 }
-
 .leaflet-control-scale-line:nth-child(2) {
     display: none;
 }
-
-/* fullscreen control ********************************/
-
-.leaflet-control-fullscreen a {
-	background: url('leaflet/images/fullscreen.png') no-repeat 0 0;
-	background-size: 26px 52px;
-}
-.leaflet-touch .leaflet-control-fullscreen a {
-	background-position: 2px 2px;
-}
-.leaflet-fullscreen-on .leaflet-control-fullscreen a {
-	background-position: 0 -26px;
-}
-.leaflet-touch.leaflet-fullscreen-on .leaflet-control-fullscreen a {
-	background-position: 2px -24px;
-}
-
-/* Do not combine these two rules; IE will break. */
-.leaflet-container:-webkit-full-screen {
-	width: 100%!important;
-	height: 100%!important;
-}
-.leaflet-container.leaflet-fullscreen-on {
-	width: 100%!important;
-	height: 100%!important;
-}
-
-.leaflet-pseudo-fullscreen {
-	position: fixed !important;
-	width: 100% !important;
-	height: 100% !important;
-	top: 0 !important;
-	left: 0 !important;
-	z-index: 99999;
-}
-
 .heading-road::before,
 .heading-sat::before,
 .leaflet-control-layers-overlays::before
@@ -179,28 +120,22 @@ body,
     display: block;
     padding: 8px 0 2px 5px;
 }
-
 .heading-road::before {
     content: 'Maps';
     padding-top: 4px;
 }
-
 .heading-sat::before {
     content: 'Satellite';
 }
-
 .leaflet-control-layers-separator {
     display: none;
 }
-
 .leaflet-control-layers-overlays::before {
     content: 'Overlays';
 }
-
 .streetview {
 	cursor: pointer;
 }
-
 .sidepanel {
 	font-family: Helvetica,Arial,sans-serif;
 	position: absolute;
@@ -296,4 +231,29 @@ body,
 }
 .sidepanel, .sidepanel-content .hiking, .sidepanel-content .cycling {
 	display: none;
+}
+#streetview {
+	overflow: hidden;
+	position: absolute;
+	left: 50px;
+	top: 10px;
+	width: calc(100% - 100px);
+	height: 40%;
+	max-height: calc(100% - 20px);
+	z-index: 700;
+	display: none;
+	cursor: ns-resize;
+}
+#streetview iframe {
+	box-sizing: border-box;
+	border: 1px solid black;
+	display: block;
+	width: 100%;
+	height: calc(100% - 6px);
+}
+#streetview #resizer {
+	height: 6px;
+}
+#streetview #resizer:hover {
+	background-color: #333;
 }
