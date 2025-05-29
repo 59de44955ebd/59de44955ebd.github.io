@@ -21,35 +21,23 @@ body {
 	position:absolute;
 	width: 100%;
 	height: 100%;
+	background-color: #2a2a2a !important;
 }
+/* hide some clutter, only show copyright and footage date */
 #pano .gmnoprint:first-child,
 #pano .gmnoprint:nth-child(4)
 {
 	display: none !important;
 }
-.gm-bundled-control-on-bottom,
-.gm-style-cc:nth-child(5),
-img[alt="Google"]
-{
-	display: none !important;
-}
-.gmnoprint button {
-	height: 20px !important;
-	font-size: 12px !important;
-}
 .gmnoprint li {
 	padding: 2px 5px !important;
 	font-size: 12px !important;
 }
-div.gm-style-cc {
-	line-height: 17px !important;
-}
-#map .gm-style-cc {
+.gm-style-cc {
 	display: none;
 }
-/* disable pegman dragging */
-div[title] {
-	pointer-events: none !important;
+.gmnoprint > .gm-style-cc {
+	display:block;
 }
 </style>
 </head>
@@ -58,10 +46,7 @@ div[title] {
 <script>
 const panoDiv = document.getElementById('pano');
 
-let map, panorama, streetViewService, last_pos,
-	is_snapped = false,
-	is_initialized = false,
-	init_task;
+let map, panorama, streetViewService, is_initialized = false, init_task;
 
 function init()
 {
@@ -69,7 +54,7 @@ function init()
 		addressControl: false,
 		fullscreenControl: false,
 		imageDateControl : true, // show date of images
-		linksControl: false, // < > arrows  on top of pano image
+//		linksControl: false, // < > arrows  on top of pano image
 		showRoadLabels: false, //street name overlays on top of pano image
 		zoomControl: false,
 	});
@@ -79,12 +64,11 @@ function init()
 		if (status == google.maps.StreetViewStatus.OK)
 		{
 			panorama.setVisible(true);
-			last_pos = this.getPosition();
+			parent.updateStreetviewMarker(this.getPosition());
 		}
 		else
 		{
-			panorama.setPosition(last_pos);
-			panorama.setVisible(true);
+			panorama.setVisible(false);
 		}
 	});
 
@@ -96,22 +80,13 @@ function init()
 function gotoLatLng(lat, lng, pov)
 {
 	init_task = function() {
-		const streetViewCoords = new google.maps.LatLng(lat, lng);
-		panorama.setPosition(streetViewCoords);
+		panorama.setPosition(new google.maps.LatLng(lat, lng));
+		//console.log(panorama.getPosition().toString());
 		if (pov)
 			panorama.setPov(pov);
 	};
 	if (is_initialized)
 		init_task();
-}
-
-function getLatLng()
-{
-	return JSON.stringify({
-		lat: panorama.location.latLng.lat(),
-		lng: panorama.location.latLng.lng(),
-		pov: panorama.pov
-	});
 }
 </script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCt-iKtoOCPEyWa8pe0nMABxUXE7ofedvo&loading=async&callback=init"></script>

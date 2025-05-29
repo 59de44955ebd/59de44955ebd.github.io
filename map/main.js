@@ -320,11 +320,6 @@ const map = L.map('map', {
 .on('click', function(evt) {
 	if (overlays.includes('Google Streetview'))
 	{
-//		if (!streetview_visible)
-//		{
-//			div_streetview.style.display = 'block';
-//			streetview_visible = true;
-//		}
 		iframe_streetview.contentWindow.gotoLatLng(evt.latlng.lat, evt.latlng.lng);
 		marker.setLatLng(evt.latlng);
 	}
@@ -539,3 +534,8 @@ div_resizer.addEventListener('mousedown', (event) => {
 div_streetview_close.addEventListener('click', () => {
 	overlay_maps['Google Streetview'].remove();
 });
+
+function updateStreetviewMarker(pos)
+{
+	marker.setLatLng([pos.lat(), pos.lng()]);
+}
