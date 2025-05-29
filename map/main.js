@@ -308,8 +308,7 @@ if (!lng)
 window.location.hash = `map=${zoom}/${lat}/${lng}/${base}/${overlays.join('|')}`;
 
 const marker = new L.Marker([lat, lng], {
-	icon: new L.Icon.Default, //new SvgIcon(),
-	id: 'foo',
+	icon: new L.Icon.Default,
     contextmenu: false,
 });
 
@@ -379,7 +378,7 @@ if (window.FileReader)
 
 function _mapChanged()
 {
-    const p = map.getCenter()
+    const p = map.getCenter();
     window.location.hash = `map=${map.getZoom()}/${p.lat}/${p.lng}/${base}/${overlays.join('|')}`;
 	if (window.OnMapChanged)
     	window.OnMapChanged(map.getZoom(), p.lat, p.lng, base, overlays.join('|'));
@@ -417,7 +416,9 @@ map.on('overlayadd', function(evt) {
 	{
 		div_streetview.style.display = 'block';
 		marker.addTo(map);
-		const latlng = marker.getLatLng();
+		map.invalidateSize();
+		const latlng = map.getCenter();
+		marker.setLatLng(latlng);
 		if (!streetview_loaded)
 		{
 			iframe_streetview.src = 'streetview.htm';
@@ -454,6 +455,7 @@ map.on('overlayremove', function(evt) {
 		div_streetview.style.display = 'none';
 		marker.remove();
 		div_streetview_close.style.display = 'none';
+		map.invalidateSize();
 	}
 	if (!has_hiking && !has_cycling)
 		sidepanel.style.display = 'none';
