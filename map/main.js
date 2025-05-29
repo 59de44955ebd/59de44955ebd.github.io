@@ -260,7 +260,7 @@ let has_hiking = false;
 let has_cycling = false;
 
 let streetview_loaded = false;
-let streetview_visible = false;
+//let streetview_visible = false;
 
 const sidepanel = document.querySelector('.sidepanel');
 const div_hiking = sidepanel.querySelector('.sidepanel-content .hiking');
@@ -271,6 +271,8 @@ const ul_cycling = div_cycling.querySelector('ul');
 const div_streetview = document.querySelector('#streetview');
 const iframe_streetview = document.querySelector('#streetview iframe');
 const div_resizer = document.querySelector('#resizer');
+
+const div_streetview_close = document.querySelector('#streetview-close');
 
 if (window.location.hash.startsWith('#map='))
 {
@@ -305,6 +307,12 @@ if (!lng)
 
 window.location.hash = `map=${zoom}/${lat}/${lng}/${base}/${overlays.join('|')}`;
 
+const marker = new L.Marker([lat, lng], {
+	icon: new L.Icon.Default, //new SvgIcon(),
+	id: 'foo',
+    contextmenu: false,
+});
+
 const map = L.map('map', {
 	editable: true,
     layers: [base_maps[base]],
@@ -313,12 +321,13 @@ const map = L.map('map', {
 .on('click', function(evt) {
 	if (overlays.includes('Google Streetview'))
 	{
-		if (!streetview_visible)
-		{
-			div_streetview.style.display = 'block';
-			streetview_visible = true;
-		}
+//		if (!streetview_visible)
+//		{
+//			div_streetview.style.display = 'block';
+//			streetview_visible = true;
+//		}
 		iframe_streetview.contentWindow.gotoLatLng(evt.latlng.lat, evt.latlng.lng);
+		marker.setLatLng(evt.latlng);
 	}
 })
 .setView([lat, lng], zoom);
@@ -406,11 +415,18 @@ map.on('overlayadd', function(evt) {
 	}
 	else if (evt.name == 'Google Streetview')
 	{
+		div_streetview.style.display = 'block';
+		marker.addTo(map);
+		const latlng = marker.getLatLng();
 		if (!streetview_loaded)
 		{
 			iframe_streetview.src = 'streetview.htm';
 			streetview_loaded = true;
+			iframe_streetview.onload = () => iframe_streetview.contentWindow.gotoLatLng(latlng.lat, latlng.lng);
 		}
+		else
+			iframe_streetview.contentWindow.gotoLatLng(latlng.lat, latlng.lng);
+		div_streetview_close.style.display = 'block';
 	}
 	if (has_hiking || has_cycling)
 		sidepanel.style.display = 'flex';
@@ -436,7 +452,8 @@ map.on('overlayremove', function(evt) {
 	else if (evt.name == 'Google Streetview')
 	{
 		div_streetview.style.display = 'none';
-		streetview_visible = false;
+		marker.remove();
+		div_streetview_close.style.display = 'none';
 	}
 	if (!has_hiking && !has_cycling)
 		sidepanel.style.display = 'none';
@@ -515,4 +532,8 @@ div_resizer.addEventListener('mousedown', (event) => {
 	iframe_streetview.style.display = 'none';
 	document.addEventListener('mousemove', on_mousemove);
 	document.addEventListener('mouseup', on_mouseup);
+});
+
+div_streetview_close.addEventListener('click', () => {
+	overlay_maps['Google Streetview'].remove();
 });

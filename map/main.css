@@ -1,11 +1,18 @@
 html,
-body,
-.map {
+body
+{
 	height: 100%;
 	width: 100%;
 	margin: 0;
 	padding: 0;
 	background-color: #000000;
+}
+body {
+	display: flex;
+	flex-flow: column;
+}
+.map {
+  	flex: 1 1 auto;
 }
 .leaflet-control-zoom:first-child {
     display: none;
@@ -233,27 +240,46 @@ body,
 	display: none;
 }
 #streetview {
-	overflow: hidden;
-	position: absolute;
-	left: 50px;
-	top: 10px;
-	width: calc(100% - 100px);
+	flex: 0 1 auto;
 	height: 40%;
-	max-height: calc(100% - 20px);
-	z-index: 700;
 	display: none;
 	cursor: ns-resize;
 }
 #streetview iframe {
 	box-sizing: border-box;
-	border: 1px solid black;
+	border: none;
 	display: block;
 	width: 100%;
-	height: calc(100% - 6px);
+	height: calc(100% - 5px);
 }
 #streetview #resizer {
-	height: 6px;
+	height: 5px;
 }
 #streetview #resizer:hover {
 	background-color: #333;
+}
+#streetview {
+  	flex: 0 1 auto;
+}
+#streetview-close {
+	position: absolute;
+	top: 5px;
+	right: 5px;
+	width: 20px;
+	height: 20px;
+	z-index: 9999;
+	background: #333;
+	text-align: center;
+	box-sizing: border-box;
+	cursor: pointer;
+	display: none;
+}
+#streetview-close:after{
+	display: inline-block;
+	content: "\00d7";
+	font-size: 30px;
+	line-height: 0;
+	vertical-align: middle;
+	color: white;
+	font-weight: bold;
 }
