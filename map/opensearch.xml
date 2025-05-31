@@ -10,7 +10,7 @@
 	<OutputEncoding>UTF-8</OutputEncoding>
 	<Language>en-en</Language>
 	<AdultContent>false</AdultContent>
-	<Url type="text/html" template="https://59de44955ebd.github.io/map/index.htm#place={searchTerms}"></Url>
+	<Url type="text/html" template="https://59de44955ebd.github.io/map/index.htm?place={searchTerms}"></Url>
 	<Image type="image/x-icon">https://59de44955ebd.github.io/map/favicon.ico</Image>
 	<Query role="example" searchTerms=""/>
 	<SyndicationRight>open</SyndicationRight>

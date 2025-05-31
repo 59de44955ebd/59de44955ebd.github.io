@@ -7,7 +7,13 @@
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="icon" href="favicon.ico" type="image/x-icon">
 <link rel="search" href="opensearch.xml" type="application/opensearchdescription+xml" title="Map">
-
+<script>
+if (window.location.search.startsWith('?place='))
+{	
+	window.location.hash = '#' + window.location.search.substr(1);
+	window.location.search = '';
+}
+</script>
 <script src="leaflet/leaflet.js"></script>
 <link href="leaflet/leaflet.css" rel="stylesheet">
 
