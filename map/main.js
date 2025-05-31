@@ -305,7 +305,8 @@ if (!lng)
     lng = 13.409671783447267;
 }
 
-window.location.hash = `map=${zoom}/${lat}/${lng}/${base}/${overlays.join('|')}`;
+if (!window.location.hash.startsWith('#place='))
+	window.location.hash = `map=${zoom}/${lat}/${lng}/${base}/${overlays.join('|')}`;
 
 const marker = new L.Marker([lat, lng], {
 	icon: new L.Icon.Default,
@@ -421,7 +422,7 @@ const map = L.map('map', {
 		marker.setLatLng(evt.latlng);
 	}
 })
-.setView([lat, lng], zoom);
+//.setView([lat, lng], zoom);
 
 L.control.layers(base_maps, overlay_maps, {position: 'topleft'}).addTo(map);
 
@@ -581,7 +582,7 @@ if (overlays_start)
     	overlay_maps[overlay].addTo(map);
 }
 
-_mapChanged();
+//_mapChanged();
 
 // add separator after sat maps
 document.querySelector('.leaflet-control-layers-base label:nth-child(1)').classList.add('heading-road');
@@ -656,4 +657,36 @@ div_streetview_close.addEventListener('click', () => {
 function updateStreetviewMarker(pos)
 {
 	marker.setLatLng([pos.lat(), pos.lng()]);
+}
+
+function gotoPlace(place)
+{
+	//fetch(`https://nominatim.openstreetmap.org/search?format=json&accept-language=de-DE&q=${encodeURIComponent(place)}`)
+	fetch(`https://nominatim.openstreetmap.org/search?format=json&accept-language=de-DE&q=${place}`)
+	.then(res => res.json())
+	.then(res => {
+		if (res.length)
+		{			
+			
+			map.setView([res[0].lat, res[0].lon], 12);
+			
+			//new_marker(-1, res[0].lat, res[0].lon, place, '#ff0000', false);
+			new L.Marker([res[0].lat, res[0].lon], {
+				icon: new L.Icon.Default,
+			    contextmenu: false,
+			}).addTo(map);
+			//map.panTo([res[0].lat, res[0].lon]);
+		}
+	});
+}
+
+if (window.location.hash.startsWith('#place='))
+{
+	const place = window.location.hash.substr(7);
+	gotoPlace(place);
+}
+else
+{
+	map.setView([lat, lng], zoom);
+	_mapChanged();
 }

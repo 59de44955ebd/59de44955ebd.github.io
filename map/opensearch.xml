@@ -1,0 +1,17 @@
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/"
+	xmlns:moz="http://www.mozilla.org/2006/browser/search/">
+	<ShortName>Map</ShortName>
+	<Description>Map</Description>
+	<LongName>Map</LongName>
+	<Developer>Map</Developer>
+	<Attribution>Copyright© 2025 Map</Attribution>
+	<Tags></Tags>
+	<InputEncoding>UTF-8</InputEncoding>
+	<OutputEncoding>UTF-8</OutputEncoding>
+	<Language>en-en</Language>
+	<AdultContent>false</AdultContent>
+	<Url type="text/html" template="https://59de44955ebd.github.io/map/index.htm#place={searchTerms}"></Url>
+	<Image type="image/x-icon">https://59de44955ebd.github.io/map/favicon.ico</Image>
+	<Query role="example" searchTerms=""/>
+	<SyndicationRight>open</SyndicationRight>
+</OpenSearchDescription>
