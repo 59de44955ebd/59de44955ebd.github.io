@@ -228,7 +228,7 @@ const overlay_maps = {
 	'Google Streetview': L.gridLayer.googleMutant({
 		type: null,
 		styles: [],
-		minZoom: 13,
+		//minZoom: 13,
 	})
 	.on('add', (evt) => evt.target._map._container.classList.toggle('streetview', true))
 	.on('remove', (evt) => evt.target._map._container.classList.toggle('streetview', false)),
@@ -312,10 +312,107 @@ const marker = new L.Marker([lat, lng], {
     contextmenu: false,
 });
 
+let control_routing;
+let marker_from, marker_to;
+
 const map = L.map('map', {
 	editable: true,
     layers: [base_maps[base]],
     wheelPxPerZoomLevel: 240,
+	contextmenu: true,
+//	    contextmenuWidth: 140,
+	contextmenuItems: [
+	{
+	    text: 'Center map here',
+	    callback: (e) => map.panTo(e.latlng),
+	},
+	'-',
+	{
+	    text: 'Route from here',
+	    callback: function (e) {
+	    	if (marker_from)
+	    	{
+	    		marker_from.remove();
+	    		marker_from = null;
+	    	}
+	    	if (marker_to)
+	    	{
+				control_routing.setWaypoints([
+					e.latlng,
+					marker_to._latlng
+				])
+				.addTo(map);
+				control_routing._container.firstChild.onclick = function(e){
+					control_routing.remove();
+				}
+				marker_to.remove();
+				marker_to = null;
+	    	}
+	    	else
+	    	{
+	    		control_routing.remove();
+				marker_from = new L.Marker(e.latlng, {
+					icon: new L.Icon.Default,
+					draggable: true,
+			        contextmenu: true,
+			        contextmenuInheritItems: false,
+			        contextmenuItems: [{
+			            text: 'Remove',
+			            callback: (e) => {
+			            	e.relatedTarget.remove();
+			            	marker_from = null;
+			            },
+			        }],
+				}).addTo(map);
+			}
+		}
+	},
+	{
+	    text: 'Route to here',
+	    callback: function (e) {
+	    	if (marker_to)
+	    	{
+	    		marker_to.remove();
+	    		marker_to = null;
+	    	}
+	    	if (marker_from)
+	    	{
+				control_routing.setWaypoints([
+					marker_from._latlng,
+					e.latlng
+				])
+				.addTo(map);
+				control_routing._container.firstChild.onclick = function(e){
+					control_routing.remove();
+				}
+				marker_from.remove();
+				marker_from = null;
+	    	}
+	    	else
+	    	{
+	    		control_routing.remove();
+				marker_to = new L.Marker(e.latlng, {
+					icon: new L.Icon.Default,
+					draggable: true,
+			        contextmenu: true,
+			        contextmenuInheritItems: false,
+			        contextmenuItems: [{
+			            text: 'Remove',
+			            callback: (e) => {
+			            	e.relatedTarget.remove();
+			            	marker_to = null;
+			            },
+			        }],
+				}).addTo(map);
+			}
+		}
+	},
+	'-',
+	{
+	    text: 'Reload Page',
+	    callback: () => {location.reload();},
+	},
+	]
 })
 .on('click', function(evt) {
 	if (overlays.includes('Google Streetview'))
@@ -348,6 +445,26 @@ L.control.locate({
 	follow: true,
 }).addTo(map);
 
+control_routing = L.Routing.control({
+	collapsible: true,
+	routeWhileDragging: true,
+	reverseWaypoints: true,
+	showAlternatives: true,
+	altLineOptions: {
+		styles: [
+			{color: 'black', opacity: 0.15, weight: 9},
+			{color: 'white', opacity: 0.8, weight: 6},
+			{color: 'blue', opacity: 0.5, weight: 2}
+		]
+	},
+	router: L.Routing.mapbox('pk.eyJ1IjoidnNsNDIiLCJhIjoiY2xha3o1ZmZ0MDA4ZDN2bXMzcnIweWhhcCJ9.IU5zt8kMIRsIhfKJWpgbgg', {
+		profile: 'mapbox/driving', // driving cycling walking
+		language: 'de',
+	}),
+	//summaryTemplate: '<div class="close-btn"><span onclick="console.log(this);">X</span></div><h2>{name}</h2><h3>{distance}, {time}</h3>',
+});
+//.addTo(map);
+	
 // only if HTML5 FileReader is supported, add elevation and filelayer plugins
 if (window.FileReader)
 {
@@ -522,6 +639,7 @@ function on_mouseup(event)
 	div_streetview.style.backgroundColor = 'unset';
 	document.removeEventListener('mousemove', on_mousemove);
 	document.removeEventListener('mouseup', on_mouseup);
+	map.invalidateSize();
 }
 
 div_resizer.addEventListener('mousedown', (event) => {
