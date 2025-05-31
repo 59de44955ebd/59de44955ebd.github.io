@@ -260,7 +260,6 @@ let has_hiking = false;
 let has_cycling = false;
 
 let streetview_loaded = false;
-//let streetview_visible = false;
 
 const sidepanel = document.querySelector('.sidepanel');
 const div_hiking = sidepanel.querySelector('.sidepanel-content .hiking');
@@ -308,8 +307,8 @@ if (!lng)
 if (!window.location.hash.startsWith('#place='))
 	window.location.hash = `map=${zoom}/${lat}/${lng}/${base}/${overlays.join('|')}`;
 
-const marker = new L.Marker([lat, lng], {
-	icon: new L.Icon.Default,
+const marker_streetview = new L.Marker([lat, lng], {
+	icon: new L.Icon.Default({'iconUrl': 'marker-icon-pink.png'}),
     contextmenu: false,
 });
 
@@ -321,7 +320,6 @@ const map = L.map('map', {
     layers: [base_maps[base]],
     wheelPxPerZoomLevel: 240,
 	contextmenu: true,
-//	    contextmenuWidth: 140,
 	contextmenuItems: [
 	{
 	    text: 'Center map here',
@@ -419,10 +417,9 @@ const map = L.map('map', {
 	if (overlays.includes('Google Streetview'))
 	{
 		iframe_streetview.contentWindow.gotoLatLng(evt.latlng.lat, evt.latlng.lng);
-		marker.setLatLng(evt.latlng);
+		marker_streetview.setLatLng(evt.latlng);
 	}
 })
-//.setView([lat, lng], zoom);
 
 L.control.layers(base_maps, overlay_maps, {position: 'topleft'}).addTo(map);
 
@@ -462,9 +459,7 @@ control_routing = L.Routing.control({
 		profile: 'mapbox/driving', // driving cycling walking
 		language: 'de',
 	}),
-	//summaryTemplate: '<div class="close-btn"><span onclick="console.log(this);">X</span></div><h2>{name}</h2><h3>{distance}, {time}</h3>',
 });
-//.addTo(map);
 	
 // only if HTML5 FileReader is supported, add elevation and filelayer plugins
 if (window.FileReader)
@@ -528,10 +523,10 @@ map.on('overlayadd', function(evt) {
 	else if (evt.name == 'Google Streetview')
 	{
 		div_streetview.style.display = 'block';
-		marker.addTo(map);
+		marker_streetview.addTo(map);
 		map.invalidateSize();
 		const latlng = map.getCenter();
-		marker.setLatLng(latlng);
+		marker_streetview.setLatLng(latlng);
 		if (!streetview_loaded)
 		{
 			iframe_streetview.src = 'streetview.htm';
@@ -566,7 +561,7 @@ map.on('overlayremove', function(evt) {
 	else if (evt.name == 'Google Streetview')
 	{
 		div_streetview.style.display = 'none';
-		marker.remove();
+		marker_streetview.remove();
 		div_streetview_close.style.display = 'none';
 		map.invalidateSize();
 	}
@@ -581,8 +576,6 @@ if (overlays_start)
 	for (let overlay of overlays_start)
     	overlay_maps[overlay].addTo(map);
 }
-
-//_mapChanged();
 
 // add separator after sat maps
 document.querySelector('.leaflet-control-layers-base label:nth-child(1)').classList.add('heading-road');
@@ -656,26 +649,29 @@ div_streetview_close.addEventListener('click', () => {
 
 function updateStreetviewMarker(pos)
 {
-	marker.setLatLng([pos.lat(), pos.lng()]);
+	marker_streetview.setLatLng([pos.lat(), pos.lng()]);
 }
 
 function gotoPlace(place)
 {
-	//fetch(`https://nominatim.openstreetmap.org/search?format=json&accept-language=de-DE&q=${encodeURIComponent(place)}`)
 	fetch(`https://nominatim.openstreetmap.org/search?format=json&accept-language=de-DE&q=${place}`)
 	.then(res => res.json())
 	.then(res => {
 		if (res.length)
 		{			
-			
 			map.setView([res[0].lat, res[0].lon], 12);
-			
-			//new_marker(-1, res[0].lat, res[0].lon, place, '#ff0000', false);
 			new L.Marker([res[0].lat, res[0].lon], {
 				icon: new L.Icon.Default,
-			    contextmenu: false,
-			}).addTo(map);
-			//map.panTo([res[0].lat, res[0].lon]);
+		        contextmenu: true,
+		        contextmenuInheritItems: false,
+		        contextmenuItems: [{
+		            text: 'Remove',
+		            callback: (e) => {
+		            	e.relatedTarget.remove();
+		            },
+		        }],
+			})
+			.addTo(map);
 		}
 	});
 }
