@@ -308,7 +308,7 @@ if (!window.location.hash.startsWith('#place='))
 	window.location.hash = `map=${zoom}/${lat}/${lng}/${base}/${overlays.join('|')}`;
 
 const marker_streetview = new L.Marker([lat, lng], {
-	icon: new L.Icon.Default({'iconUrl': 'marker-icon-pink.png'}),
+	icon: new L.Icon.Default({'iconUrl': 'marker-icon-black.png'}),
     contextmenu: false,
 });
 
@@ -577,9 +577,9 @@ if (overlays_start)
     	overlay_maps[overlay].addTo(map);
 }
 
-// add separator after sat maps
-document.querySelector('.leaflet-control-layers-base label:nth-child(1)').classList.add('heading-road');
-document.querySelector(`.leaflet-control-layers-base label:nth-child(${Object.keys(road_maps).length + 1})`).classList.add('heading-sat');
+//// add separator after sat maps
+//document.querySelector('.leaflet-control-layers-base label:nth-child(1)').classList.add('heading-road');
+//document.querySelector(`.leaflet-control-layers-base label:nth-child(${Object.keys(road_maps).length + 1})`).classList.add('heading-sat');
 
 function get_bbox()
 {
@@ -659,7 +659,10 @@ function gotoPlace(place)
 	.then(res => {
 		if (res.length)
 		{			
-			map.setView([res[0].lat, res[0].lon], 12);
+			map.setView([res[0].lat, res[0].lon], 14);
+			// add separator after sat maps
+			document.querySelector('.leaflet-control-layers-base label:nth-child(1)').classList.add('heading-road');
+			document.querySelector(`.leaflet-control-layers-base label:nth-child(${Object.keys(road_maps).length + 1})`).classList.add('heading-sat');
 			new L.Marker([res[0].lat, res[0].lon], {
 				icon: new L.Icon.Default,
 		        contextmenu: true,
@@ -684,5 +687,8 @@ if (window.location.hash.startsWith('#place='))
 else
 {
 	map.setView([lat, lng], zoom);
+	// add separator after sat maps
+	document.querySelector('.leaflet-control-layers-base label:nth-child(1)').classList.add('heading-road');
+	document.querySelector(`.leaflet-control-layers-base label:nth-child(${Object.keys(road_maps).length + 1})`).classList.add('heading-sat');
 	_mapChanged();
 }
