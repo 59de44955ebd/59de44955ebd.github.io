@@ -261,6 +261,8 @@ let has_cycling = false;
 
 let streetview_loaded = false;
 
+let sv_lat, sv_lng, sv_heading=0, sv_pitch=0, sv_zoom=1;
+
 const sidepanel = document.querySelector('.sidepanel');
 const div_hiking = sidepanel.querySelector('.sidepanel-content .hiking');
 const ul_hiking = div_hiking.querySelector('ul');
@@ -291,6 +293,12 @@ if (window.location.hash.startsWith('#map='))
         {
             const m = decodeURIComponent(parts[4]);
             overlays_start = m.split('|');
+        }
+        // file:///D:/src/59de44955ebd.github.io/map/index.htm#map=14/52.51253841478769/13.3873987197876/OpenStreetMap/Google%20Streetview/52.51699010037842|13.38857978008839|65.75294777463368|-7.852689847433766|1
+        if (parts.length > 5 && parts[5])
+        {
+            [sv_lat, sv_lng, sv_heading, sv_pitch, sv_zoom] = parts[5].split('|').map(parseFloat);
+            //console.log(sv_lat, sv_lng, sv_heading, sv_pitch, sv_zoom);
         }
     }
     catch(e){}
@@ -531,7 +539,11 @@ map.on('overlayadd', function(evt) {
 		{
 			iframe_streetview.src = 'streetview.htm';
 			streetview_loaded = true;
-			iframe_streetview.onload = () => iframe_streetview.contentWindow.gotoLatLng(latlng.lat, latlng.lng);
+			iframe_streetview.onload = () => iframe_streetview.contentWindow.gotoLatLng(
+				sv_lat ? sv_lat : latlng.lat, 
+				sv_lng ? sv_lng : latlng.lng, 
+				{heading: sv_heading, pitch: sv_pitch, zoom: sv_zoom}
+			);
 		}
 		else
 			iframe_streetview.contentWindow.gotoLatLng(latlng.lat, latlng.lng);
@@ -650,6 +662,13 @@ div_streetview_close.addEventListener('click', () => {
 function updateStreetviewMarker(pos)
 {
 	marker_streetview.setLatLng([pos.lat(), pos.lng()]);
+}
+
+function updateStreetviewMarkerHash(pos, pov)
+{	
+	//console.log([pos.lat(), pos.lng(), pov.heading, pov.pitch, pov.zoom].join('|'));
+	const p = map.getCenter();
+	window.location.hash = `map=${map.getZoom()}/${p.lat}/${p.lng}/${base}/${overlays.join('|')}/${[pos.lat(), pos.lng(), pov.heading, pov.pitch, pov.zoom].join('|')}`;
 }
 
 function gotoPlace(place)

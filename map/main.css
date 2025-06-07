@@ -241,7 +241,7 @@ body {
 }
 #streetview {
 	flex: 0 1 auto;
-	height: 40%;
+	height: 67%;
 	display: none;
 	cursor: ns-resize;
 }

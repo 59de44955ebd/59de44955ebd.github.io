@@ -46,7 +46,10 @@ body {
 <script>
 const panoDiv = document.getElementById('pano');
 
-let map, panorama, streetViewService, is_initialized = false, init_task;
+let map, panorama, is_initialized = false, init_task, last_pov_json;
+
+let pov = {heading: 0, pitch: 0, zoom: 1};
+let pos;
 
 function init()
 {
@@ -64,7 +67,7 @@ function init()
 		if (status == google.maps.StreetViewStatus.OK)
 		{
 			panorama.setVisible(true);
-			parent.updateStreetviewMarker(this.getPosition());
+			parent.updateStreetviewMarker(this.getPosition());//, this.getPov());
 		}
 		else
 		{
@@ -72,6 +75,23 @@ function init()
 		}
 	});
 
+	panorama.addListener('position_changed', function(evt){
+		pos = this.getPosition();
+		parent.updateStreetviewMarkerHash(pos, pov);
+	});
+
+	panorama.addListener('pov_changed', function(evt){
+		pov = this.getPov();
+		const pov_json = JSON.stringify(pov);
+		if (pov_json != last_pov_json)
+		{
+			//console.log('pov_changed', pov);
+			last_pov_json = pov_json;
+			parent.updateStreetviewMarkerHash(pos, pov);
+		}
+		//else console.log('NOPE');
+	});
+	
 	is_initialized = true;
 	if (init_task)
 		init_task();
