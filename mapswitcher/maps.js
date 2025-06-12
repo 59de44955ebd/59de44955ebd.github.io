@@ -30,6 +30,7 @@ const SPECIAL_CATEGORY = "4. Specials";
 const LOCAL_CATEGORY = "3. Local maps";
 const PORTAL_CATEGORY = "6. Map portal";
 //const LINK_CATEGORY = "7. Static links";
+
 const maps = [
 {
 	name: "Google Maps",
@@ -53,6 +54,31 @@ const maps = [
 			zoom = Math.round(-1.44 * Math.log(zoom) + 27.5);
 			return [lat, lon, zoom];
 		}
+	},
+},
+{
+	name: "Map (github.io)",
+	category: MAIN_CATEGORY,
+	default_check: true,
+	domain: "59de44955ebd.github.io",
+	getUrl(lat, lon, zoom) {
+		return 'https://59de44955ebd.github.io/map/index.htm#map=' + zoom + '/' + lat + '/' + lon;
+	},
+	getLatLonZoom(url) {
+		const match = url.match(/59de44955ebd\.github\.io\/map[^=]*=(\d{1,2})\/(-?\d[0-9.]*)\/(-?\d[0-9.]*)/);
+		if (match) {
+			let [, zoom, lat, lon] = match;
+			return [lat, lon, zoom];
+		}
+	},
+},
+{
+	name: "QPyMap",
+	category: MAIN_CATEGORY,
+	default_check: true,
+	domain: "qpymap",
+	getUrl(lat, lon, zoom) {
+		return 'map:' + zoom + '/' + lat + '/' + lon;
 	},
 },
 {
