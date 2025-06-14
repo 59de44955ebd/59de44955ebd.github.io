@@ -10,6 +10,12 @@ body {
     margin: 15px;
     font-family: arial;
 }
+h2 {
+	margin-bottom: 0;
+	font-size: 1em;
+	font-weight: normal;
+}
+
 #link {
     text-decoration: none;
     border: 1px solid black;
@@ -19,23 +25,28 @@ body {
     color: black;
     display: inline-block;
 }
-#editor {
-    min-height: 480px;
-    display: block;
-    margin-top: 20px;
-    border: 1px solid #8f8f9d;
-}
-button {
-    margin-top: 10px;
-}
-#result {
-    min-height: 200px;
+
+textarea {
+	display: block;
+	margin-top: 10px;
+    min-height: 140px;
     width: -webkit-fill-available;
     width: -moz-available;
     display: block;
-    margin-top: 20px;
     font: 12px/normal 'Consolas';
 }
+
+#editor {
+    min-height: 480px;
+    display: block;
+    border: 1px solid #8f8f9d;
+    margin-top: 10px;
+}
+
+button {
+    margin-top: 10px;
+}
+
 span.name {
     margin-left: 20px;
     font-size: 12px;
@@ -81,7 +92,6 @@ if (vids.length)
     }
     else
     {
-        console.log(v.src);
         fetch('http://localhost:8888/adddownload.req?URL='+encodeURI(v.src));
     }
     return;
@@ -89,7 +99,6 @@ if (vids.length)
 const frms=document.getElementsByTagName('iframe');
 for(let frm of frms)
 {
-    console.log('iframe', frm.src);
     if (!frm.src)frm=frm.documentElement.getElementsByTagName('iframe')[0];
     if (frm.src !='' && !frm.src.includes('facebook')&& !frm.src.includes('google'))
     {
@@ -105,9 +114,9 @@ for(let frm of frms)
 
 <textarea id="result"></textarea>
 
-<button id="save_html">Save as bookmarks.html</button>
+<h2>Bookmark Icon <small>(drop 16x16 png/jpg/ico file, paste result into userChrome.css, see about:profiles)</small></h2>
 
-<span class="name">Icon: <input type="text" id="icon" value="" size="48"></span>
+<textarea id="chrome"></textarea>
 
 <script src="https://cdn.jsdelivr.net/npm/ace-builds@1.34.2/src-min/ace.js"></script>
 <script>
@@ -115,16 +124,15 @@ const editor = ace.edit("editor");
 const result = document.querySelector('#result');
 const a = document.querySelector('#link');
 const input_name = document.querySelector('#name');
-const input_icon = document.querySelector('#icon');
+const textarea_chrome = document.querySelector('#chrome');
+const div_import = document.querySelector('#import');
 
 editor.setTheme('ace/theme/textmate');
 editor.session.setMode('ace/mode/javascript');
 editor.session.setUseWrapMode(true);
 editor.setOption('dragEnabled', false);
 
-const parts = location.href.split('/');
-parts.pop(),
-input_icon.value = parts.join('/') + '/favicon.ico';
+let icon_data_url;
 
 function update_bookmark()
 {
@@ -146,48 +154,22 @@ function update_bookmark()
     result.value = res;
     a.href = res;
     a.innerText = input_name.value;
+    if (icon_data_url)
+    {
+textarea_chrome.value = `.bookmark-item[scheme="javascript"][label="${input_name.value}"] image
+{
+  background-image: url('${icon_data_url}');
+}
+`;
+    }
 }
 
 document.querySelector('#update').onclick = update_bookmark;
-
-function export_html(icon_url)
-{
-    const a = document.createElement('a');
-    document.body.appendChild(a);
-    a.style = 'display:none';
-    a.innerText = input_name.value + '.html';
-    if (icon_url)
-        // ICON: Chrome, ICON_URI: Firefox
-        a.href = 'data:text/html;charset=utf-8,' + encodeURIComponent('<A HREF="' + result.value + '" ICON="'+icon_url+'" ICON_URI="'+icon_url+'">'+input_name.value+'</A>');
-    else
-        a.href = 'data:text/html;charset=utf-8,' + encodeURIComponent('<A HREF="' + result.value + '">'+input_name.value+'</A>');
-    a.setAttribute('download', input_name.value + '.html');
-    a.click();
-}
-
-document.querySelector('#save_html').onclick = async function(){
-    update_bookmark();
-    if (input_icon.value.startsWith('http'))
-    {
-        let blob = await fetch(input_icon.value)
-        .then(r => r.blob());
-        let dataUrl = await new Promise(resolve => {
-            let reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.readAsDataURL(blob);
-        });
-        export_html(dataUrl.replace('image/vnd.microsoft.icon;','image/x-icon;'));
-    }
-    else
-        export_html(input_icon.value);
-};
 
 function preventDefaults(e) {
     e.preventDefault();
     e.stopPropagation();
 }
-
-const div_import = document.querySelector('#import');
 
 div_import.addEventListener('dragenter', function(e){
     preventDefaults(e);
@@ -236,32 +218,37 @@ div_import.addEventListener('drop', function(e){
     }
 });
 
-input_icon.addEventListener('dragenter', function(e){
+textarea_chrome.addEventListener('dragenter', function(e){
     preventDefaults(e);
     this.classList.add('highlight');
 });
 
-input_icon.addEventListener('dragleave', function(e){
+textarea_chrome.addEventListener('dragleave', function(e){
     preventDefaults(e);
     this.classList.remove('highlight');
 });
 
-input_icon.addEventListener('dragover', function(e){
+textarea_chrome.addEventListener('dragover', function(e){
     preventDefaults(e);
     this.classList.add('highlight');
 });
 
-input_icon.addEventListener('drop', function(e){
+textarea_chrome.addEventListener('drop', function(e){
     preventDefaults(e);
     this.classList.remove('highlight');
     let file = e.dataTransfer.files[0];
-    if (file && ['image/x-icon', 'image/png', 'image/jpeg', 'image/jpg'].includes(file.type))
+    if (file && ['image/png', 'image/jpeg', 'image/jpg', 'image/x-icon'].includes(file.type))
     {
         let fileReader = new FileReader();
         fileReader.readAsDataURL(file);
         fileReader.onload = () => {
-            input_icon.value = fileReader.result;
-        };
+        	icon_data_url = fileReader.result;
+textarea_chrome.value = `.bookmark-item[scheme="javascript"][label="${input_name.value}"] image
+{
+  background-image: url('${icon_data_url}');
+}
+`;};
+
     }
 }, false);
 

@@ -1,0 +1,15 @@
+.commons_overlay {
+	display: none;
+	z-index: 9999;
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	background: black;
+	overflow: hidden;
+	cursor: zoom-out;
+}
+.commons_overlay img {
+	width: 100%;
+	height: 100%;
+	object-fit: scale-down;
+}

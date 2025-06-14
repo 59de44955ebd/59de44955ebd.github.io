@@ -72,6 +72,13 @@ if (L.MarkerClusterGroup && L.Photo.Cluster) {
 			// note we just keep adding data to photoLayer as zoom, we dont remove the out of view data (no point!)
 			this._done = [];
 
+			this._div_overlay = document.createElement('div');
+			this._div_overlay.className = 'commons_overlay';
+			const img = document.createElement('img');
+			this._div_overlay.appendChild(img);
+			document.body.appendChild(this._div_overlay);
+			this._div_overlay.onclick = () => this._div_overlay.style.display = 'none';
+			
 			this.on('click',  (evt) => {
 				let img;
 				const popup = L.popup({
@@ -81,8 +88,20 @@ if (L.MarkerClusterGroup && L.Photo.Cluster) {
 						img = document.createElement('img');
 						img.src = evt.layer.photo.url;
 						div.appendChild(img);
+												                    
 						const p = document.createElement('p');
 						p.innerText = evt.layer.photo.title;
+						
+						p.appendChild(document.createTextNode(' '));
+						const a = document.createElement('a');
+	                    a.innerText = '[original image]';
+	                    a.onclick = (e) => {
+	                    	e.preventDefault();
+	                    	this._div_overlay.querySelector('img').src = evt.layer.photo.image_original;
+	                    	this._div_overlay.style.display = 'block';
+	                    }
+	                    p.appendChild(a);
+						
 						div.appendChild(p);
 						if (this.options.closePopupOnClick)
 							div.style.cursor = 'pointer';
@@ -208,7 +227,8 @@ if (L.MarkerClusterGroup && L.Photo.Cluster) {
 					//console.log('md5', md5);
 					row.thumbnail = `https://upload.wikimedia.org/wikipedia/commons/thumb/${md5.charAt(0)}/${md5}/${file}/${this.options.thumbSize}px-${file}`;
 					row.url = `https://upload.wikimedia.org/wikipedia/commons/thumb/${md5.charAt(0)}/${md5}/${file}/${this.options.imageSize}px-${file}`;
-
+					row.image_original = `https://upload.wikimedia.org/wikipedia/commons/${md5.charAt(0)}/${md5}/${file}`;
+					
 					//row.link = '';//this.options.domain+"/photo/"+row.id;
 					newRows.push(row);
 					this._done[row.pageid] = 1;
