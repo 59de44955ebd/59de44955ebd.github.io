@@ -143,7 +143,7 @@ body {
 .streetview {
 	cursor: pointer;
 }
-.sidepanel {
+.trails-sidepanel {
 	font-family: Helvetica,Arial,sans-serif;
 	position: absolute;
 	top: 10px;
@@ -170,7 +170,7 @@ body {
 	overflow: hidden;
 	font-size: small;
 }
-.sidepanel h3 {
+.trails-sidepanel h3 {
 	display: flex;
 	background-color: #ccc;
 	justify-content: space-between;
@@ -179,18 +179,18 @@ body {
 	padding: 0;
 	font-size: 1.2em;
 }
-.sidepanel h3 span {
+.trails-sidepanel h3 span {
 	padding: 4px;
 	flex-grow: 1;
 	font-weight: 700;
 	text-align: center;
 }
-.sidepanel ul {
+.trails-sidepanel ul {
 	list-style: none;
 	padding: 0;
 	margin: 0;
 }
-.sidepanel button {
+.trails-sidepanel button {
 	width: 100%;
 	border: none;
 	padding-left: 5px;
@@ -199,29 +199,29 @@ body {
 	display: flex;
 	justify-content: space-between;
 }
-.sidepanel button:hover {
+.trails-sidepanel button:hover {
 	background: #ddd;
 }
-.sidepanel .route-symbol {
+.trails-sidepanel .route-symbol {
 	flex: 0 0 45px;
 }
-.sidepanel img {
+.trails-sidepanel img {
 	max-width: 32px;
 	max-height: 16px;
 }
-.sidepanel .main-info {
+.trails-sidepanel .main-info {
 	display: flex;
 	flex-direction: column;
 	flex: 1 auto;
 	align-items: flex-start;
 	min-width: 20px;
 }
-.sidepanel .title-line {
+.trails-sidepanel .title-line {
 	display: flex;
 	width: 100%;
 	min-width: 20px;
 }
-.sidepanel .route-title {
+.trails-sidepanel .route-title {
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	overflow: hidden;
@@ -229,15 +229,25 @@ body {
 	flex: 1 auto;
 	min-width: 20px;
 }
-.sidepanel .route-ref {
+.trails-sidepanel .route-ref {
 	white-space: nowrap;
 	padding-left: 2px;
 	color: #5a5a96;
 	font-family: mono;
 	flex: 0 2px;
 }
-.sidepanel, .sidepanel-content .hiking, .sidepanel-content .cycling {
+.trails-sidepanel, .sidepanel-content .hiking, .sidepanel-content .cycling {
 	display: none;
+}
+#trails-contextmenu {
+	width: 130px;
+	position: absolute;
+	z-index: 10000;
+}
+#trails-contextmenu a:hover {
+    background-color: #f4f4f4;
+    border-top: 1px solid #f0f0f0;
+    border-bottom: 1px solid #f0f0f0;
 }
 #streetview {
 	flex: 0 1 auto;

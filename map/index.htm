@@ -54,18 +54,22 @@ if (window.location.search.startsWith('?place='))
 <body>
 <div id="streetview"><iframe></iframe><div id="resizer"></div></div>
 <div id="map" class="map"></div>
-<div class="sidepanel">
+<div class="trails-sidepanel">
 	<div class="sidepanel-content">
 		<div class="sidepanel-page hiking">
 			<h3><span>Hiking routes</span></h3>
-			<ul></ul>
+			<ul data-flavor="hiking"></ul>
 		</div>
 		<div class="sidepanel-page cycling">
 			<h3><span>Cycling routes</span></h3>
-			<ul></ul>
+			<ul data-flavor="cycling"></ul>
 		</div>
 	</div>
 </div>
+<div id="trails-contextmenu" class="leaflet-container leaflet-contextmenu">
+	<a href="#" data-ext='gpx' class="leaflet-contextmenu-item">Download as .gpx</a>
+	<a href="#" data-ext="kml" class="leaflet-contextmenu-item">Download as .kml</a>
+<div>
 <div id="streetview-close" title="Close"></div>
 <script src="main.js"></script>
 </body>

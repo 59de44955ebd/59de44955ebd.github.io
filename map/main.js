@@ -263,10 +263,10 @@ let streetview_loaded = false;
 
 let sv_lat, sv_lng, sv_heading=0, sv_pitch=0, sv_zoom=1;
 
-const sidepanel = document.querySelector('.sidepanel');
-const div_hiking = sidepanel.querySelector('.sidepanel-content .hiking');
+const sidepanel_trails = document.querySelector('.trails-sidepanel');
+const div_hiking = sidepanel_trails.querySelector('.sidepanel-content .hiking');
 const ul_hiking = div_hiking.querySelector('ul');
-const div_cycling = sidepanel.querySelector('.sidepanel-content .cycling');
+const div_cycling = sidepanel_trails.querySelector('.sidepanel-content .cycling');
 const ul_cycling = div_cycling.querySelector('ul');
 
 const div_streetview = document.querySelector('#streetview');
@@ -550,7 +550,7 @@ map.on('overlayadd', function(evt) {
 		div_streetview_close.style.display = 'block';
 	}
 	if (has_hiking || has_cycling)
-		sidepanel.style.display = 'flex';
+		sidepanel_trails.style.display = 'flex';
 	
     _mapChanged();
 });
@@ -578,7 +578,7 @@ map.on('overlayremove', function(evt) {
 		map.invalidateSize();
 	}
 	if (!has_hiking && !has_cycling)
-		sidepanel.style.display = 'none';
+		sidepanel_trails.style.display = 'none';
 
     _mapChanged();
 });
@@ -614,7 +614,7 @@ function update_trails(flavor)
 			if (!row.name)
 				continue;
 			html += `<li>
-				<button type="button">
+				<button type="button" data-id="${row['id']}">
 					<div class="route-symbol">
 						<img alt="route symbol" src="https://${flavor}.waymarkedtrails.org/api/v1/symbols/id/${row['symbol_id']}.svg">
 					</div>
@@ -666,7 +666,6 @@ function updateStreetviewMarker(pos)
 
 function updateStreetviewMarkerHash(pos, pov)
 {	
-	//console.log([pos.lat(), pos.lng(), pov.heading, pov.pitch, pov.zoom].join('|'));
 	const p = map.getCenter();
 	window.location.hash = `map=${map.getZoom()}/${p.lat}/${p.lng}/${base}/${overlays.join('|')}/${[pos.lat(), pos.lng(), pov.heading, pov.pitch, pov.zoom].join('|')}`;
 }
@@ -695,6 +694,35 @@ function gotoPlace(place)
 			})
 			.addTo(map);
 		}
+	});
+}
+
+const trails_contextmenu = document.querySelector('#trails-contextmenu');
+let trails_current_trail;
+
+function trails_cm_clicked(e) {
+	e.preventDefault();
+	trails_contextmenu.style.display = 'none';
+	document.removeEventListener('click', trails_cm_clicked);
+	if (e.target.classList.contains('leaflet-contextmenu-item'))
+	{
+		const trail_flavor = trails_current_trail.parentNode.parentNode.dataset.flavor;
+		location.href = `https://${trail_flavor}.waymarkedtrails.org/api/v1/details/relation/${trails_current_trail.dataset.id}/geometry/${e.target.dataset.ext}`;	
+	}
+}
+
+for (let ul of [ul_hiking, ul_cycling])
+{
+	ul.addEventListener('contextmenu', (e) => {
+		e.preventDefault();
+		let el = e.target;
+		while (el.tagName != 'BUTTON')
+			el = el.parentNode;
+		trails_current_trail = el;		
+		trails_contextmenu.style.left = e.clientX + 'px';
+		trails_contextmenu.style.top = e.clientY + 'px';
+		trails_contextmenu.style.display = 'block';
+		document.addEventListener('click', trails_cm_clicked);
 	});
 }
 
