@@ -1,6 +1,6 @@
 'use strict';
 
-const BING_KEY = 'AqRX_rx3tLFIIRmRsW8ZY2iJfj84IxUPzesU36Fr-y8JROPionQJN82GwuP71SJ7';
+const BING_KEY = 'AkA11fkgPKpFw4N2YNoT7aE5eRyCkGbdHAwMym3WKcMnLxrVYci66PZ5LbMIeIdA';
 const MAPBOX_KEY = 'pk.eyJ1IjoidnNsNDIiLCJhIjoiY2xha3o1ZmZ0MDA4ZDN2bXMzcnIweWhhcCJ9.IU5zt8kMIRsIhfKJWpgbgg';
 const MAPTILER_KEY = 'ppaPBnSs4o1IOGtXW8oI';
 const THUNDERFOREST_KEY = 'c6644d4c8d6f4bd18067c449f978a779';
@@ -434,7 +434,7 @@ L.control.layers(base_maps, overlay_maps, {position: 'topleft'}).addTo(map);
 L.control.scale().addTo(map);
 
 L.control.measure({position: 'topleft'}).addTo(map);
-	
+
 map.addControl( new L.Control.Search({
 	url: 'https://nominatim.openstreetmap.org/search?format=json&accept-language=de-DE&q={s}',
 	jsonpParam: 'json_callback',
@@ -468,7 +468,7 @@ control_routing = L.Routing.control({
 		language: 'de',
 	}),
 });
-	
+
 // only if HTML5 FileReader is supported, add elevation and filelayer plugins
 if (window.FileReader)
 {
@@ -540,8 +540,8 @@ map.on('overlayadd', function(evt) {
 			iframe_streetview.src = 'streetview.htm';
 			streetview_loaded = true;
 			iframe_streetview.onload = () => iframe_streetview.contentWindow.gotoLatLng(
-				sv_lat ? sv_lat : latlng.lat, 
-				sv_lng ? sv_lng : latlng.lng, 
+				sv_lat ? sv_lat : latlng.lat,
+				sv_lng ? sv_lng : latlng.lng,
 				{heading: sv_heading, pitch: sv_pitch, zoom: sv_zoom}
 			);
 		}
@@ -551,13 +551,13 @@ map.on('overlayadd', function(evt) {
 	}
 	if (has_hiking || has_cycling)
 		sidepanel_trails.style.display = 'flex';
-	
+
     _mapChanged();
 });
 
 map.on('overlayremove', function(evt) {
 	overlays.splice(overlays.indexOf(evt.name), 1);
-	
+
 	if (evt.name == 'Hiking')
 	{
 		has_hiking = false;
@@ -595,7 +595,7 @@ if (overlays_start)
 
 function get_bbox()
 {
-	const bounds = map.getBounds();	
+	const bounds = map.getBounds();
 	return [
 		...Object.values(L.CRS.EPSG3857.project(bounds._southWest)),
 		...Object.values(L.CRS.EPSG3857.project(bounds._northEast))
@@ -665,7 +665,7 @@ function updateStreetviewMarker(pos)
 }
 
 function updateStreetviewMarkerHash(pos, pov)
-{	
+{
 	const p = map.getCenter();
 	window.location.hash = `map=${map.getZoom()}/${p.lat}/${p.lng}/${base}/${overlays.join('|')}/${[pos.lat(), pos.lng(), pov.heading, pov.pitch, pov.zoom].join('|')}`;
 }
@@ -676,7 +676,7 @@ function gotoPlace(place)
 	.then(res => res.json())
 	.then(res => {
 		if (res.length)
-		{			
+		{
 			map.setView([res[0].lat, res[0].lon], 14);
 			// add separator after sat maps
 			document.querySelector('.leaflet-control-layers-base label:nth-child(1)').classList.add('heading-road');
@@ -707,7 +707,7 @@ function trails_cm_clicked(e) {
 	if (e.target.classList.contains('leaflet-contextmenu-item'))
 	{
 		const trail_flavor = trails_current_trail.parentNode.parentNode.dataset.flavor;
-		location.href = `https://${trail_flavor}.waymarkedtrails.org/api/v1/details/relation/${trails_current_trail.dataset.id}/geometry/${e.target.dataset.ext}`;	
+		location.href = `https://${trail_flavor}.waymarkedtrails.org/api/v1/details/relation/${trails_current_trail.dataset.id}/geometry/${e.target.dataset.ext}`;
 	}
 }
 
@@ -718,7 +718,7 @@ for (let ul of [ul_hiking, ul_cycling])
 		let el = e.target;
 		while (el.tagName != 'BUTTON')
 			el = el.parentNode;
-		trails_current_trail = el;		
+		trails_current_trail = el;
 		trails_contextmenu.style.left = e.clientX + 'px';
 		trails_contextmenu.style.top = e.clientY + 'px';
 		trails_contextmenu.style.display = 'block';
