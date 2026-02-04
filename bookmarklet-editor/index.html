@@ -195,7 +195,10 @@ div_import.addEventListener('drop', function(e){
         {
             i.getAsString(s => {
                 const data = JSON.parse(s);
-                let code = decodeURIComponent(data.uri);
+
+//                let code = decodeURIComponent(data.uri);
+                let code = data.uri.replaceAll('%20', ' ')
+
                 // remove "javascript:(function(){" and "})();"
                 code = code.substring(23, code.length - 5);
                 code = code.replaceAll(/{(?=(?:(?:[^"]*"){2})*[^"]*$)/g, '\n{\n');

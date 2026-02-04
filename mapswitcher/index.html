@@ -175,6 +175,12 @@ let prevUrls = location.href.match(/#(.*)$/);
 if (prevUrls && prevUrls[1] != 'about:blank')
 {
 	let prevUrl = prevUrls[1];
+	if (decodeURIComponent(prevUrl).startsWith('map:'))
+	{
+		[lat, lon, zoom] = getLatLonZoom(prevUrl.substring(4), maps);
+		location.href = 'https://59de44955ebd.github.io/map/index.htm#map=' + zoom + '/' + lat + '/' + lon;
+	}
+
 	elementUrl.innerHTML = prevUrl;
 	let latlonzoom;
 	latlonzoom = getLatLonZoom(prevUrl, maps);
