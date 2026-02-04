@@ -226,12 +226,28 @@ const maps = [
 	},
 },
 {
-	name: "Bing",
+	name: "Bing (Road)",
 	category: MAIN_CATEGORY,
 	default_check: true,
 	domain: "www.bing.com",
 	getUrl(lat, lon, zoom) {
-		return 'https://www.bing.com/maps?cp=' + lat + '~' + lon + '&lvl=' + zoom;
+		return 'https://www.bing.com/maps?cp=' + lat + '~' + lon + '&lvl=' + zoom + '&style=r';
+	},
+	getLatLonZoom(url) {
+		const match = url.match(/www\.bing\.com\/maps\?cp=(-?\d[0-9.]*)%7E(-?\d[0-9.]*)&lvl=(-?\d[0-9.]*)/); //([0-9.]*\/(-?\d[0-9.]*)\/(-?\d[0-9.]*)/);
+		if (match) {
+			const [, lat, lon, zoom] = match;
+			return [lat, lon, zoom];
+		}
+	},
+},
+{
+	name: "Bing (Sat)",
+	category: MAIN_CATEGORY,
+	default_check: true,
+	domain: "www.bing.com",
+	getUrl(lat, lon, zoom) {
+		return 'https://www.bing.com/maps?cp=' + lat + '~' + lon + '&lvl=' + zoom + '&style=a';
 	},
 },
 {

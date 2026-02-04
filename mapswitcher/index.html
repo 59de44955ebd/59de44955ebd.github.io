@@ -234,7 +234,8 @@ for (let category of categories)
 	maplist += '</ul>';
 }
 document.getElementById('maps').innerHTML =  maplist;
-window.navigator.registerProtocolHandler('geo', location.href.split('#').shift() + '#%s', 'mapswitcher');
+if (location.protocol != 'file:')
+	window.navigator.registerProtocolHandler('geo', location.href.split('#').shift() + '#%s', 'mapswitcher');
 </script>
 </body>
 </html>
