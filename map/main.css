@@ -292,6 +292,9 @@ body {
 	font-weight: bold;
 	text-shadow: -1px -1px 0 #333, 1px -1px 0 #333, -1px 1px 0 #333, 1px 1px 0 #333;
 }
+img[src*="Roadmap!"] {
+	display: none !important;
+}
 .leaflet-routing-collapse-btn {
     right: 5px;
     color: #000;
