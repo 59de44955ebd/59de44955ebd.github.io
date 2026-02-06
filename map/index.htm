@@ -9,7 +9,7 @@
 <link rel="search" href="opensearch.xml" type="application/opensearchdescription+xml" title="Map">
 <script>
 if (window.location.search.startsWith('?place='))
-{	
+{
 	window.location.hash = '#' + window.location.search.substr(1);
 	window.location.search = '';
 }
@@ -29,7 +29,9 @@ if (window.location.search.startsWith('?place='))
 <script src="leaflet/leaflet.filelayer.js"></script>
 <script src="leaflet/togeojson.js"></script>
 
+<!--
 <script src="leaflet/bing.js"></script>
+-->
 
 <script src="leaflet/leaflet.markercluster.js"></script>
 <link href="leaflet/leaflet.markercluster.css" rel="stylesheet">
@@ -49,7 +51,7 @@ if (window.location.search.startsWith('?place='))
 <link rel="stylesheet" href="leaflet/leaflet-routing-machine.css">
 <script src="leaflet/leaflet-routing-machine.js"></script>
 
-<link rel="stylesheet" href="main.css"> 
+<link rel="stylesheet" href="main.css">
 </head>
 <body>
 <div id="streetview"><iframe></iframe><div id="resizer"></div></div>

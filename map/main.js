@@ -1,6 +1,5 @@
 'use strict';
 
-//const BING_KEY = 'AkA11fkgPKpFw4N2YNoT7aE5eRyCkGbdHAwMym3WKcMnLxrVYci66PZ5LbMIeIdA';
 const MAPBOX_KEY = 'pk.eyJ1IjoidnNsNDIiLCJhIjoiY2xha3o1ZmZ0MDA4ZDN2bXMzcnIweWhhcCJ9.IU5zt8kMIRsIhfKJWpgbgg';
 const MAPTILER_KEY = 'ppaPBnSs4o1IOGtXW8oI';
 const THUNDERFOREST_KEY = 'c6644d4c8d6f4bd18067c449f978a779';
@@ -9,10 +8,6 @@ const THUNDERFOREST_KEY = 'c6644d4c8d6f4bd18067c449f978a779';
 // road maps
 //######################################
 const road_maps = {
-
-//    'Bing Roadmap': new L.BingLayer(BING_KEY, {
-//        imagerySet: 'RoadOnDemand'
-//    }),
 
     'CycleOSM': L.tileLayer(
     	'https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
@@ -128,20 +123,6 @@ const road_maps = {
 // satellite footage
 //######################################
 const sat_maps = {
-
-//    'Bing': new L.BingLayer(BING_KEY,
-//	    {
-//	        imagerySet: 'Aerial',
-//	        maxZoom: 20,
-//	    }
-//    ),
-//
-//    'Bing (labels)': new L.BingLayer(BING_KEY,
-//	    {
-//	        imagerySet: 'AerialWithLabels',
-//	        maxZoom: 20,
-//	    }
-//    ),
 
     'Google': L.tileLayer(
         'http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
