@@ -51,6 +51,9 @@ body {
 	width: 30px !important;
 	height: 30px !important;
 }
+.leaflet-control-filelayer a {
+	border: none !important;
+}
 .leaflet-control-fullscreen a:hover,
 .leaflet-control-layers a:hover,
 .leaflet-control-search > a:hover,

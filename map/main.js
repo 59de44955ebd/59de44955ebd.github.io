@@ -279,11 +279,9 @@ if (window.location.hash.startsWith('#map='))
             const m = decodeURIComponent(parts[4]);
             overlays_start = m.split('|');
         }
-        // file:///D:/src/59de44955ebd.github.io/map/index.htm#map=14/52.51253841478769/13.3873987197876/OpenStreetMap/Google%20Streetview/52.51699010037842|13.38857978008839|65.75294777463368|-7.852689847433766|1
         if (parts.length > 5 && parts[5])
         {
             [sv_lat, sv_lng, sv_heading, sv_pitch, sv_zoom] = parts[5].split('|').map(parseFloat);
-            //console.log(sv_lat, sv_lng, sv_heading, sv_pitch, sv_zoom);
         }
     }
     catch(e){}
@@ -414,7 +412,7 @@ const map = L.map('map', {
 	}
 })
 
-L.control.layers(base_maps, overlay_maps, {position: 'topleft'}).addTo(map);
+const control_layers = L.control.layers(base_maps, overlay_maps, {position: 'topleft'}).addTo(map);
 
 L.control.scale().addTo(map);
 
@@ -448,36 +446,78 @@ control_routing = L.Routing.control({
 			{color: 'blue', opacity: 0.5, weight: 2}
 		]
 	},
-	router: L.Routing.mapbox('pk.eyJ1IjoidnNsNDIiLCJhIjoiY2xha3o1ZmZ0MDA4ZDN2bXMzcnIweWhhcCJ9.IU5zt8kMIRsIhfKJWpgbgg', {
+	router: L.Routing.mapbox(MAPBOX_KEY, {
 		profile: 'mapbox/driving', // driving cycling walking
 		language: 'de',
 	}),
 });
 
-// only if HTML5 FileReader is supported, add elevation and filelayer plugins
-if (window.FileReader)
-{
-	// FileLayer
-	const style = {color: '#ee0033', opacity: 0.6, weight: 3, clickable: false};
-	L.Control.FileLayerLoad.LABEL = 'gpx';
-	var fileL = L.Control.fileLayerLoad({
-	    fileSizeLimit: 1024 * 1024 * 10,
-		fitBounds: true,
-		layerOptions: {
-			style: style,
-			//onEachFeature: el.addData.bind(el),
-			pointToLayer: function (data, latlng) {
-				return L.circleMarker(latlng, {style: style});
-			}
-		},
-	}).addTo(map);
+const filelayer_style = {
+    color: 'red',
+    opacity: 1.0,
+    fillOpacity: 1.0,
+    weight: 2,
+    clickable: true
+};
 
-	fileL.loader.on('data:loaded', function (e){
-		layersControl.addOverlay(e.layer, e.filename);
-	});
+const control_filelayer = L.Control.fileLayerLoad({
+    fitBounds: true,
+    layerOptions: {
+        style: filelayer_style,
+        pointToLayer: function (data, latlng) {
+            return L.circleMarker(
+                latlng,
+                { style: filelayer_style }
+            );
+        }
+    }
+});
+control_filelayer.addTo(map);
+
+/**
+ * Truncates value based on number of decimals
+ *
+ * @param {number} num - The input value.
+ * @param {number} len - The number of decimals.
+ * @return {number} The truncated vale.
+ */
+function round_prec(num, len) {
+    return Math.round(num * (Math.pow(10, len))) / (Math.pow(10, len));
 }
 
-function _mapChanged()
+/**
+ * Calculates overall length of a MultiLineString
+ *
+ * @param {Object} layer - The MultiLineString layer.
+ * @return {number} The length im meters.
+ */
+function get_path_length(layer)
+{
+    const latlngs = layer._defaultShape ? layer._defaultShape() : layer.getLatLngs();
+    if (latlngs.length < 2)
+    	return 0;
+	let len = 0;
+    for (var i = 0; i < latlngs.length - 1; i++)
+    {
+        len += latlngs[i].distanceTo(latlngs[i + 1]);
+    }
+    return len;
+}
+
+control_filelayer.loader.on('data:loaded', function (e) {
+    control_layers.addOverlay(e.layer, e.filename);
+    e.layer.bindPopup((layer) => {
+    	let html = `<b>${e.filename}</b><br>`;
+    	if (layer._latlngs)
+    	{
+			html += `<br><b>Points</b>: ${layer._latlngs.length}`;
+			html += `<br><b>Length</b>: ${round_prec(get_path_length(layer)/1000, 2)} km`;
+    	}
+    	return html;
+    });
+});
+
+function _mapchanged()
 {
     const p = map.getCenter();
     window.location.hash = `map=${map.getZoom()}/${p.lat}/${p.lng}/${base}/${overlays.join('|')}`;
@@ -490,62 +530,17 @@ map.on('moveend', function(evt) {
 		update_trails('hiking');
 	if (has_cycling)
 		update_trails('cycling');
-	_mapChanged();
+	_mapchanged();
 });
 
 map.on('baselayerchange', function(evt) {
     base = evt.name;
-    _mapChanged();
+    _mapchanged();
 });
 
-//.on('overlayadd', function(evt) {
-//	if (evt.name == 'Hiking')
-//	{
-//		has_hiking = true;
-//		div_sidebar_hiking.style.display = 'flex';
-//		update_trails('hiking');
-//	}
-//	else if (evt.name == 'Cycling')
-//	{
-//		has_cycling = true;
-//		div_sidebar_cycling.style.display = 'flex';
-//		update_trails('cycling');
-//	}
-//})
-//.on('overlayremove', function(evt) {
-//	if (evt.name == 'Hiking')
-//	{
-//		has_hiking = false;
-//		div_sidebar_hiking.style.display = 'none';
-//		ul_hiking.innerHTML = '';
-//	}
-//	else if (evt.name == 'Cycling')
-//	{
-//		has_cycling = false;
-//		div_sidebar_cycling.style.display = 'none';
-//		ul_cycling.innerHTML = '';
-//	}
-//})
-
-
-
-
-
 map.on('overlayadd', function(evt) {
-    overlays.push(evt.name);
-
-//	if (evt.name == 'Hiking')
-//	{
-//		has_hiking = true;
-//		div_hiking.style.display = 'block';
-//		update_trails('hiking');
-//	}
-//	else if (evt.name == 'Cycling')
-//	{
-//		has_cycling = true;
-//		div_cycling.style.display = 'block';
-//		update_trails('cycling');
-//	}
+	if (evt.name in overlay_maps)
+    	overlays.push(evt.name);
 	if (evt.name == 'Hiking')
 	{
 		has_hiking = true;
@@ -581,11 +576,12 @@ map.on('overlayadd', function(evt) {
 			iframe_streetview.contentWindow.gotoLatLng(latlng.lat, latlng.lng);
 		div_streetview_close.style.display = 'block';
 	}
-    _mapChanged();
+    _mapchanged();
 });
 
 map.on('overlayremove', function(evt) {
-	overlays.splice(overlays.indexOf(evt.name), 1);
+	if (evt.name in overlay_maps)
+		overlays.splice(overlays.indexOf(evt.name), 1);
 	if (evt.name == 'Hiking')
 	{
 		has_hiking = false;
@@ -609,18 +605,15 @@ map.on('overlayremove', function(evt) {
 		div_streetview_close.style.display = 'none';
 		map.invalidateSize();
 	}
-    _mapChanged();
+    _mapchanged();
 });
 
 if (overlays_start)
 {
 	for (let overlay of overlays_start)
-    	overlay_maps[overlay].addTo(map);
+		if (overlay in overlay_maps)
+    		overlay_maps[overlay].addTo(map);
 }
-
-//// add separator after sat maps
-//document.querySelector('.leaflet-control-layers-base label:nth-child(1)').classList.add('heading-road');
-//document.querySelector(`.leaflet-control-layers-base label:nth-child(${Object.keys(road_maps).length + 1})`).classList.add('heading-sat');
 
 function get_bbox()
 {
@@ -773,5 +766,5 @@ else
 	document.querySelector('.leaflet-control-layers-base label:nth-child(1)').classList.add('heading-road');
 	document.querySelector(`.leaflet-control-layers-base label:nth-child(${Object.keys(road_maps).length + 1})`).classList.add('heading-sat');
 
-	_mapChanged();
+	_mapchanged();
 }
