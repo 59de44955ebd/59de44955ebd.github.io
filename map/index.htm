@@ -5,6 +5,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="mobile-web-app-capable" content="yes">
+<meta name="color-scheme" content="light dark">
 <link rel="icon" href="favicon.ico" type="image/x-icon">
 <link rel="search" href="opensearch.xml" type="application/opensearchdescription+xml" title="Map">
 <script>
@@ -29,10 +30,6 @@ if (window.location.search.startsWith('?place='))
 <script src="leaflet/leaflet.filelayer.js"></script>
 <script src="leaflet/togeojson.js"></script>
 
-<!--
-<script src="leaflet/bing.js"></script>
--->
-
 <script src="leaflet/leaflet.markercluster.js"></script>
 <link href="leaflet/leaflet.markercluster.css" rel="stylesheet">
 
@@ -52,27 +49,27 @@ if (window.location.search.startsWith('?place='))
 <script src="leaflet/leaflet-routing-machine.js"></script>
 
 <link rel="stylesheet" href="main.css">
+<link rel="stylesheet" href="dark.css" media="(prefers-color-scheme: dark)">
 </head>
 <body>
-<div id="streetview"><iframe></iframe><div id="resizer"></div></div>
-<div id="map" class="map"></div>
-<div class="trails-sidepanel">
-	<div class="sidepanel-content">
-		<div class="sidepanel-page hiking">
-			<h3><span>Hiking routes</span></h3>
-			<ul data-flavor="hiking"></ul>
-		</div>
-		<div class="sidepanel-page cycling">
-			<h3><span>Cycling routes</span></h3>
-			<ul data-flavor="cycling"></ul>
-		</div>
+
+<div class="streetview-container"><iframe></iframe><div class="resizer"></div></div>
+<div class="streetview-close" title="Close Streetview"></div>
+
+<div id="map" class="map">
+	<div class="sidepanel sidepanel-hiking">
+		<div class="heading">Hiking routes</div>
+		<ul data-flavor="hiking"></ul>
+	</div>
+	<div class="sidepanel sidepanel-cycling" style="display:none">
+		<div class="heading">Cycling routes</div>
+		<ul data-flavor="cycling"></ul>
 	</div>
 </div>
-<div id="trails-contextmenu" class="leaflet-container leaflet-contextmenu">
-	<a href="#" data-ext='gpx' class="leaflet-contextmenu-item">Download as .gpx</a>
-	<a href="#" data-ext="kml" class="leaflet-contextmenu-item">Download as .kml</a>
-<div>
-<div id="streetview-close" title="Close"></div>
+
+<iframe class="wmt"></iframe>
+<button class="wmt"></button>
+
 <script src="main.js"></script>
 </body>
 </html>

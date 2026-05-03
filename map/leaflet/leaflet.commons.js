@@ -56,19 +56,20 @@ if (L.MarkerClusterGroup && L.Photo.Cluster) {
 
 			maxImages: 60,
 
-			thumbSize: 100,
-			imageSize: 640,
+			// Current standard sizes in Wikimedia production: 20px, 40px, 60px, 120px, 250px, 330px, 500px, 960px, 1280px, 1920px, 3840px
+			thumbSize: 60,
+			imageSize: 500,
+			imageSizeLarge: 1920,
 
 			updateMinPixelDistance: 60,
 
-			closePopupOnClick: true,
 		},
 
 		initialize: function (options) {
 			L.setOptions(this, options);
 			L.Photo.Cluster.prototype.initialize.call(this);
 
-			//simple associative array to avoid adding the same thumbnail to photo data
+			// simple associative array to avoid adding the same thumbnail to photo data
 			// note we just keep adding data to photoLayer as zoom, we dont remove the out of view data (no point!)
 			this._done = [];
 
@@ -78,7 +79,7 @@ if (L.MarkerClusterGroup && L.Photo.Cluster) {
 			this._div_overlay.appendChild(img);
 			document.body.appendChild(this._div_overlay);
 			this._div_overlay.onclick = () => this._div_overlay.style.display = 'none';
-			
+
 			this.on('click',  (evt) => {
 				let img;
 				const popup = L.popup({
@@ -87,39 +88,44 @@ if (L.MarkerClusterGroup && L.Photo.Cluster) {
 						const div = document.createElement('div');
 						img = document.createElement('img');
 						img.src = evt.layer.photo.url;
-						div.appendChild(img);
-												                    
-						const p = document.createElement('p');
-						p.innerText = evt.layer.photo.title;
-						
-						p.appendChild(document.createTextNode(' '));
-						const a = document.createElement('a');
-	                    a.innerText = '[original image]';
-	                    a.onclick = (e) => {
+	                    img.onclick = (e) => {
 	                    	e.preventDefault();
-	                    	this._div_overlay.querySelector('img').src = evt.layer.photo.image_original;
-	                    	this._div_overlay.style.display = 'block';
+	                    	this._div_overlay.querySelector('img').src = '';
+	                    	//this._div_overlay.querySelector('img').src = evt.layer.photo.image_original;
+	                    	this._div_overlay.querySelector('img').src = evt.layer.photo.image_large;
+	                    	this._div_overlay.style.display = 'flex';
 	                    }
-	                    p.appendChild(a);
-						
-						div.appendChild(p);
-						if (this.options.closePopupOnClick)
-							div.style.cursor = 'pointer';
+						div.appendChild(img);
+
+						const a = document.createElement('a');
+						a.innerText = evt.layer.photo.title;
+						a.href = `https://commons.wikimedia.org/wiki/${evt.layer.photo.title}`;
+						a.target = '_blank';
+
+//						p.appendChild(document.createTextNode(' '));
+//						const a = document.createElement('a');
+//	                    a.innerText = '[original image]';
+//	                    a.onclick = (e) => {
+//	                    	e.preventDefault();
+//	                    	this._div_overlay.querySelector('img').src = evt.layer.photo.image_original;
+//	                    	this._div_overlay.style.display = 'flex';
+//	                    }
+//	                    p.appendChild(a);
+
+						div.appendChild(a);
 						return div;
 					},
 			 	   	className: 'leaflet-popup-photo',
 					minWidth: this.options.imageSize - 1,
-					closeButton: false,
+					closeButton: true,
 				});
 
 				evt.layer.bindPopup(popup).openPopup();
-
+				popup._closeButton.style.display = 'none';
 				img.onload = () => {
-//					console.log('LOADED', img);
 					popup._adjustPan();
+					popup._closeButton.style.display = 'block';
 				};
-				if (this.options.closePopupOnClick)
-					popup._container.onclick = () => popup.close();
 			});
 
 			//is the a fetch in progress?
@@ -130,8 +136,6 @@ if (L.MarkerClusterGroup && L.Photo.Cluster) {
 			this._shownall = false;
 			this._prevPoint = null;
 			this._totalImages = null;
-
-			//console.log(this._md5_hex('Hello World'));
 		},
 
 		onAdd: function (map) {
@@ -227,8 +231,9 @@ if (L.MarkerClusterGroup && L.Photo.Cluster) {
 					//console.log('md5', md5);
 					row.thumbnail = `https://upload.wikimedia.org/wikipedia/commons/thumb/${md5.charAt(0)}/${md5}/${file}/${this.options.thumbSize}px-${file}`;
 					row.url = `https://upload.wikimedia.org/wikipedia/commons/thumb/${md5.charAt(0)}/${md5}/${file}/${this.options.imageSize}px-${file}`;
+					row.image_large = `https://upload.wikimedia.org/wikipedia/commons/thumb/${md5.charAt(0)}/${md5}/${file}/${this.options.imageSizeLarge}px-${file}`;
 					row.image_original = `https://upload.wikimedia.org/wikipedia/commons/${md5.charAt(0)}/${md5}/${file}`;
-					
+
 					//row.link = '';//this.options.domain+"/photo/"+row.id;
 					newRows.push(row);
 					this._done[row.pageid] = 1;

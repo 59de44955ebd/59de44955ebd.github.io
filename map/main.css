@@ -1,3 +1,7 @@
+* {
+	box-sizing: border-box;
+	font-family: "Segoe UI",Arial,Helvetica,sans-serif;
+}
 html,
 body
 {
@@ -15,7 +19,7 @@ body {
   	flex: 1 1 auto;
 }
 .leaflet-control-zoom:first-child {
-    display: none;
+	display: none;
 }
 .leaflet-control-fullscreen,
 .leaflet-control-layers,
@@ -24,9 +28,9 @@ body {
 .leaflet-control-filelayer,
 .leaflet-control-measure
 {
-    background-color: #fff !important;
-    border: 1px solid rgba(0,0,0,0.4) !important;
-    border-radius: 5px !important;
+	background-color: #fff !important;
+	border: 1px solid rgba(0,0,0,0.4) !important;
+	border-radius: 5px !important;
 }
 .leaflet-control-fullscreen:hover,
 .leaflet-control-search:hover,
@@ -34,7 +38,7 @@ body {
 .leaflet-control-filelayer:hover,
 .leaflet-control-measure:hover
 {
-    background-color: #f4f4f4 !important;
+	background-color: #f4f4f4 !important;
 }
 .leaflet-control-fullscreen a,
 .leaflet-control-layers a,
@@ -43,9 +47,9 @@ body {
 .leaflet-control-filelayer a,
 .leaflet-control-measure a
 {
-    background-color: unset !important;
-    width: 30px !important;
-    height: 30px !important;
+	background-color: unset !important;
+	width: 30px !important;
+	height: 30px !important;
 }
 .leaflet-control-fullscreen a:hover,
 .leaflet-control-layers a:hover,
@@ -54,14 +58,14 @@ body {
 .leaflet-control-filelayer a:hover,
 .leaflet-control-measure a:hover
 {
-    background-color: unset !important;
+	background-color: unset !important;
 }
 /* layers control ********************************/
 .leaflet-control-layers-toggle {
-    background-size: 20px 20px;
+	background-size: 20px 20px;
 }
 .leaflet-control-layers-list {
-    user-select: none;
+	user-select: none;
 }
 /* search control ********************************/
 .leaflet-control-search {
@@ -82,17 +86,17 @@ body {
 	background: #fff;
 	border: 1px solid #666;
 	border-radius: 2px;
-    height: 20px;
-    padding: 0 18px 0 2px;
-    margin: 4px 0 4px 4px;
-    width: 150px;
+	height: 20px;
+	padding: 0 18px 0 2px;
+	margin: 4px 0 4px 4px;
+	width: 150px;
 }
 .leaflet-control-search .search-button,
 .leaflet-control-search .search-button:hover
 {
-    display: block;
-    float:left;
-    background: url('leaflet/images/search-icon.png') no-repeat 5px 5px;
+	display: block;
+	float:left;
+	background: url('leaflet/images/search-icon.png') no-repeat 5px 5px;
 }
 /* locate control ********************************/
 .leaflet-bar-part-single {
@@ -107,171 +111,113 @@ body {
 	background-image: url('leaflet/images/locate.png');
 }
 .leaflet-control-locate.requesting a {
-    background-image: url('leaflet/images/spinner.gif');
+	background-image: url('leaflet/images/spinner.gif');
 }
 .leaflet-control-locate.active a {
-    background-image: url('leaflet/images/locate_active.png');
+	background-image: url('leaflet/images/locate_active.png');
 }
 /* scale control ********************************/
 .leaflet-control-scale-line {
-    user-select: none;
+	user-select: none;
 }
 .leaflet-control-scale-line:nth-child(2) {
-    display: none;
+	display: none;
 }
 .heading-road::before,
 .heading-sat::before,
 .leaflet-control-layers-overlays::before
  {
-    font-weight: bold;
-    display: block;
-    padding: 8px 0 2px 5px;
+ 	font-size: 12px;
+	font-weight: bold;
+	display: block;
+	padding: 8px 0 2px 5px;
 }
 .heading-road::before {
-    content: 'Maps';
-    padding-top: 4px;
+	content: 'Maps';
+	padding-top: 0px;
 }
 .heading-sat::before {
-    content: 'Satellite';
+	content: 'Satellite';
 }
 .leaflet-control-layers-separator {
-    display: none;
+	display: none;
 }
 .leaflet-control-layers-overlays::before {
-    content: 'Overlays';
+	content: 'Overlays';
 }
-.streetview {
-	cursor: pointer;
-}
-.trails-sidepanel {
-	font-family: Helvetica,Arial,sans-serif;
+.sidepanel {
+	font-size: 12px;
 	position: absolute;
 	top: 10px;
-	height: unset;
-	max-height: calc(100% - 35px);
 	right: 10px;
-	width: 18em;
-	max-width: 48%;
-	background-color: #fff;
-	box-shadow: 0 1px 7px rgba(0,0,0,0.65);
-	-webkit-border-radius: 4px;
+	width: 220px;
+	background-color: rgba(255,255,255,0.9);
+	border: 1px solid rgba(0,0,0,0.4) !important;
 	border-radius: 4px;
-	z-index: 999;
-	display: flex;
-	flex-direction: column;
+	z-index: 1000;
+	padding-bottom: 4px;
+	display: none;
 }
-.sidepanel-content {
-	overflow: auto;
-	width: 100%;
-	flex-grow: 1;
-	padding: 0;
+.sidepanel .heading {
+	font-size: 12px;
+	font-weight: bold;
+	padding: 6px 0 2px 5px;
 }
-.sidepanel-page {
-	overflow: hidden;
-	font-size: small;
-}
-.trails-sidepanel h3 {
-	display: flex;
-	background-color: #ccc;
-	justify-content: space-between;
-	align-items: center;
-	margin: 0;
-	padding: 0;
-	font-size: 1.2em;
-}
-.trails-sidepanel h3 span {
-	padding: 4px;
-	flex-grow: 1;
-	font-weight: 700;
-	text-align: center;
-}
-.trails-sidepanel ul {
+.sidepanel ul {
 	list-style: none;
 	padding: 0;
 	margin: 0;
+	max-height: calc(100vh - 65px);
+	overflow-y: auto;
 }
-.trails-sidepanel button {
-	width: 100%;
-	border: none;
-	padding-left: 5px;
-	background: #f8f8f8;
-	margin-bottom: 2px;
-	display: flex;
-	justify-content: space-between;
+.sidepanel li {
+	position: relative;
+	cursor: pointer;
+	height: 16px;
+	margin: 5px 0px;
+	padding: 0 10px;
 }
-.trails-sidepanel button:hover {
+.sidepanel li:hover {
 	background: #ddd;
 }
-.trails-sidepanel .route-symbol {
-	flex: 0 0 45px;
-}
-.trails-sidepanel img {
+.sidepanel img {
 	max-width: 32px;
-	max-height: 16px;
+	height: 16px;
 }
-.trails-sidepanel .main-info {
-	display: flex;
-	flex-direction: column;
-	flex: 1 auto;
-	align-items: flex-start;
-	min-width: 20px;
-}
-.trails-sidepanel .title-line {
-	display: flex;
-	width: 100%;
-	min-width: 20px;
-}
-.trails-sidepanel .route-title {
+.sidepanel span {
+	display: inline-block;
+	position: absolute;
+	left: 45px;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	overflow: hidden;
 	text-align: left;
-	flex: 1 auto;
-	min-width: 20px;
+	max-width: calc(100% - 50px);
+	line-height: 15px;
 }
-.trails-sidepanel .route-ref {
-	white-space: nowrap;
-	padding-left: 2px;
-	color: #5a5a96;
-	font-family: mono;
-	flex: 0 2px;
-}
-.trails-sidepanel, .sidepanel-content .hiking, .sidepanel-content .cycling {
-	display: none;
-}
-#trails-contextmenu {
-	width: 130px;
-	position: absolute;
-	z-index: 10000;
-}
-#trails-contextmenu a:hover {
-    background-color: #f4f4f4;
-    border-top: 1px solid #f0f0f0;
-    border-bottom: 1px solid #f0f0f0;
-}
-#streetview {
+.streetview-container {
 	flex: 0 1 auto;
 	height: 67%;
 	display: none;
 	cursor: ns-resize;
 }
-#streetview iframe {
+.streetview-container iframe {
 	box-sizing: border-box;
 	border: none;
 	display: block;
 	width: 100%;
 	height: calc(100% - 5px);
 }
-#streetview #resizer {
+.streetview-container .resizer {
 	height: 5px;
 }
-#streetview #resizer:hover {
+.streetview-container .resizer:hover {
 	background-color: #333;
 }
-#streetview {
+.streetview-container {
   	flex: 0 1 auto;
 }
-#streetview-close {
+.streetview-close {
 	position: absolute;
 	top: 5px;
 	right: 5px;
@@ -282,7 +228,7 @@ body {
 	display: none;
 	padding: 1px;
 }
-#streetview-close:after{
+.streetview-close:after{
 	display: inline-block;
 	content: "\00d7";
 	font-size: 30px;
@@ -292,14 +238,17 @@ body {
 	font-weight: bold;
 	text-shadow: -1px -1px 0 #333, 1px -1px 0 #333, -1px 1px 0 #333, 1px 1px 0 #333;
 }
+.map.streetview {
+	cursor: pointer;
+}
 img[src*="Roadmap!"] {
 	display: none !important;
 }
 .leaflet-routing-collapse-btn {
-    right: 5px;
-    color: #000;
-    cursor: pointer;
-    line-height: 26px;
+	right: 5px;
+	color: #000;
+	cursor: pointer;
+	line-height: 26px;
 }
 .leaflet-routing-container .header {
 	padding-left: 5px;
@@ -309,14 +258,35 @@ img[src*="Roadmap!"] {
 .leaflet-routing-container .header label {
 	margin-right: 10px;
 	user-select: none;
-    cursor: pointer;
+	cursor: pointer;
 }
 .leaflet-routing-container .header input {
 	vertical-align: text-bottom;
 }
 .leaflet-routing-reverse-waypoints {
-    padding: 0 4px;
-    font-size: 12px;
-    line-height: 12px;
-    margin-left: 5px;
+	padding: 0 4px;
+	font-size: 12px;
+	line-height: 12px;
+	margin-left: 5px;
+}
+iframe.wmt {
+	border: none;
+    position: absolute;
+    width: 320px;
+    height: 100%;
+    display: none;
+    z-index: 9998;
+}
+button.wmt {
+    position: absolute;
+	left: 284px;
+	top: 60px;
+	width: 36px;
+	height: 38px;
+    background: none;
+    border: none;
+    color: #000;
+    display: none;
+    cursor: pointer;
+    z-index: 9999;
 }

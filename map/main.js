@@ -237,24 +237,28 @@ overlay_maps['Google Streetview'].addGoogleLayer('StreetViewCoverageLayer');
 let base = 'OpenStreetMap', overlays = [], overlays_start = null;
 let zoom, lat, lng;
 
+//######################################
+// Trails
+//######################################
+const sidepanel_hiking = document.querySelector('.sidepanel-hiking');
+const ul_hiking = sidepanel_hiking.querySelector('ul');
+
+const sidepanel_cycling = document.querySelector('.sidepanel-cycling');
+const ul_cycling = sidepanel_cycling.querySelector('ul');
+
 let has_hiking = false;
 let has_cycling = false;
 
+//######################################
+// Streetview
+//######################################
+const div_streetview = document.querySelector('.streetview-container');
+const iframe_streetview = div_streetview.querySelector('iframe');
+const div_resizer = div_streetview.querySelector('.resizer');
+const div_streetview_close = document.querySelector('.streetview-close');
+
 let streetview_loaded = false;
-
 let sv_lat, sv_lng, sv_heading=0, sv_pitch=0, sv_zoom=1;
-
-const sidepanel_trails = document.querySelector('.trails-sidepanel');
-const div_hiking = sidepanel_trails.querySelector('.sidepanel-content .hiking');
-const ul_hiking = div_hiking.querySelector('ul');
-const div_cycling = sidepanel_trails.querySelector('.sidepanel-content .cycling');
-const ul_cycling = div_cycling.querySelector('ul');
-
-const div_streetview = document.querySelector('#streetview');
-const iframe_streetview = document.querySelector('#streetview iframe');
-const div_resizer = document.querySelector('#resizer');
-
-const div_streetview_close = document.querySelector('#streetview-close');
 
 if (window.location.hash.startsWith('#map='))
 {
@@ -494,19 +498,66 @@ map.on('baselayerchange', function(evt) {
     _mapChanged();
 });
 
+//.on('overlayadd', function(evt) {
+//	if (evt.name == 'Hiking')
+//	{
+//		has_hiking = true;
+//		div_sidebar_hiking.style.display = 'flex';
+//		update_trails('hiking');
+//	}
+//	else if (evt.name == 'Cycling')
+//	{
+//		has_cycling = true;
+//		div_sidebar_cycling.style.display = 'flex';
+//		update_trails('cycling');
+//	}
+//})
+//.on('overlayremove', function(evt) {
+//	if (evt.name == 'Hiking')
+//	{
+//		has_hiking = false;
+//		div_sidebar_hiking.style.display = 'none';
+//		ul_hiking.innerHTML = '';
+//	}
+//	else if (evt.name == 'Cycling')
+//	{
+//		has_cycling = false;
+//		div_sidebar_cycling.style.display = 'none';
+//		ul_cycling.innerHTML = '';
+//	}
+//})
+
+
+
+
+
 map.on('overlayadd', function(evt) {
     overlays.push(evt.name);
 
+//	if (evt.name == 'Hiking')
+//	{
+//		has_hiking = true;
+//		div_hiking.style.display = 'block';
+//		update_trails('hiking');
+//	}
+//	else if (evt.name == 'Cycling')
+//	{
+//		has_cycling = true;
+//		div_cycling.style.display = 'block';
+//		update_trails('cycling');
+//	}
 	if (evt.name == 'Hiking')
 	{
 		has_hiking = true;
-		div_hiking.style.display = 'block';
+		sidepanel_hiking.style.right = has_cycling ? '240px' : '10px';
+		sidepanel_hiking.style.display = 'block'; //'flex';
 		update_trails('hiking');
 	}
 	else if (evt.name == 'Cycling')
 	{
 		has_cycling = true;
-		div_cycling.style.display = 'block';
+		sidepanel_cycling.style.right = has_hiking ? '240px' : '10px';
+		sidepanel_cycling.style.display = 'block'; //'flex';
 		update_trails('cycling');
 	}
 	else if (evt.name == 'Google Streetview')
@@ -530,26 +581,26 @@ map.on('overlayadd', function(evt) {
 			iframe_streetview.contentWindow.gotoLatLng(latlng.lat, latlng.lng);
 		div_streetview_close.style.display = 'block';
 	}
-	if (has_hiking || has_cycling)
-		sidepanel_trails.style.display = 'flex';
-
     _mapChanged();
 });
 
 map.on('overlayremove', function(evt) {
 	overlays.splice(overlays.indexOf(evt.name), 1);
-
 	if (evt.name == 'Hiking')
 	{
 		has_hiking = false;
-		div_hiking.style.display = 'none';
+		sidepanel_hiking.style.display = 'none';
 		ul_hiking.innerHTML = '';
+		if (has_cycling)
+			sidepanel_cycling.style.right = '10px';
 	}
 	else if (evt.name == 'Cycling')
 	{
 		has_cycling = false;
-		div_cycling.style.display = 'none';
+		sidepanel_cycling.style.display = 'none';
 		ul_cycling.innerHTML = '';
+		if (has_hiking)
+			sidepanel_hiking.style.right = '10px';
 	}
 	else if (evt.name == 'Google Streetview')
 	{
@@ -558,9 +609,6 @@ map.on('overlayremove', function(evt) {
 		div_streetview_close.style.display = 'none';
 		map.invalidateSize();
 	}
-	if (!has_hiking && !has_cycling)
-		sidepanel_trails.style.display = 'none';
-
     _mapChanged();
 });
 
@@ -586,7 +634,7 @@ function get_bbox()
 function update_trails(flavor)
 {
 	const bbox = get_bbox();
-	fetch(`https://${flavor}.waymarkedtrails.org/api/v1/list/by_area?limit=25&bbox=${bbox}`)
+	fetch(`https://${flavor}.waymarkedtrails.org/api/v1/list/by_area?limit=50&bbox=${bbox}`)
 	.then(res => res.json())
 	.then(res => {
 		let html = '';
@@ -594,18 +642,9 @@ function update_trails(flavor)
 		{
 			if (!row.name)
 				continue;
-			html += `<li>
-				<button type="button" data-id="${row['id']}">
-					<div class="route-symbol">
-						<img alt="route symbol" src="https://${flavor}.waymarkedtrails.org/api/v1/symbols/id/${row['symbol_id']}.svg">
-					</div>
-					<div class="main-info">
-						<div class="title-line">
-							<div class="route-title" title="${row.name}">${row.name}</div>
-							<div class="route-ref">${row.ref ? row.ref : ''}</div>
-						</div>
-					</div>
-				</button>
+			html += `<li data-id="${row['id']}" class="route-title" title="${row.name}">
+				<img alt="route symbol" src="https://${flavor}.waymarkedtrails.org/api/v1/symbols/id/${row['symbol_id']}.svg">
+				<span>${row.name}</span>
 			</li>`;
 		}
 		if (flavor == 'hiking')
@@ -678,33 +717,48 @@ function gotoPlace(place)
 	});
 }
 
-const trails_contextmenu = document.querySelector('#trails-contextmenu');
-let trails_current_trail;
+const iframe_wmt = document.querySelector('iframe.wmt');
+const btn_wmt = document.querySelector('button.wmt');
+btn_wmt.onclick = () => {
+	iframe_wmt.style.display = 'none';
+	btn_wmt.style.display = 'none';
+	iframe_wmt.src = 'about:blank';
+};
 
-function trails_cm_clicked(e) {
+function show_trails_frame(e, trail) {
 	e.preventDefault();
-	trails_contextmenu.style.display = 'none';
-	document.removeEventListener('click', trails_cm_clicked);
-	if (e.target.classList.contains('leaflet-contextmenu-item'))
-	{
-		const trail_flavor = trails_current_trail.parentNode.parentNode.dataset.flavor;
-		location.href = `https://${trail_flavor}.waymarkedtrails.org/api/v1/details/relation/${trails_current_trail.dataset.id}/geometry/${e.target.dataset.ext}`;
-	}
+	const trail_flavor = trail.parentNode.dataset.flavor;
+	const url = `https://${trail_flavor}.waymarkedtrails.org/#route?id=${trail.dataset.id}&type=relation`;
+	iframe_wmt.src = url;
+	iframe_wmt.style.display = 'block';
+	btn_wmt.style.display = 'block';
 }
 
 for (let ul of [ul_hiking, ul_cycling])
 {
-	ul.addEventListener('contextmenu', (e) => {
+	ul.addEventListener('click', (e) => {
 		e.preventDefault();
 		let el = e.target;
-		while (el.tagName != 'BUTTON')
+		while (el.tagName != 'LI')
 			el = el.parentNode;
-		trails_current_trail = el;
-		trails_contextmenu.style.left = e.clientX + 'px';
-		trails_contextmenu.style.top = e.clientY + 'px';
-		trails_contextmenu.style.display = 'block';
-		document.addEventListener('click', trails_cm_clicked);
+		show_trails_frame(e, el);
 	});
+}
+
+const dark_css = document.querySelector('link[rel=stylesheet][media*=prefers-color-scheme][media*=dark]');
+
+function force_theme(is_dark)
+{
+	//document.documentElement.setAttribute("data-theme", "dark");
+	document.querySelector('meta[name=color-scheme]').content = is_dark ? 'dark' : 'light';
+	dark_css.media = is_dark ? 'all' : 'not all';
+}
+
+function reset_theme()
+{
+	//document.documentElement.setAttribute("data-theme", "dark");
+	document.querySelector('meta[name=color-scheme]').content = 'light dark';
+	dark_css.media = '(prefers-color-scheme: dark)';
 }
 
 if (window.location.hash.startsWith('#place='))
@@ -718,5 +772,6 @@ else
 	// add separator after sat maps
 	document.querySelector('.leaflet-control-layers-base label:nth-child(1)').classList.add('heading-road');
 	document.querySelector(`.leaflet-control-layers-base label:nth-child(${Object.keys(road_maps).length + 1})`).classList.add('heading-sat');
+
 	_mapChanged();
 }
