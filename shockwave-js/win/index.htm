@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Director in the Browser</title>
+<style>
+html, body {
+    width: 100%;
+}
+body {
+    background-color: #333;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+}
+h1 {
+    color: white;
+}
+#main {
+    width: 1024px;
+    margin: auto;
+}
+#console {
+    white-space: pre;
+    font: 14px monospace;
+    line-height: 14px;
+}
+#menu {
+    color: white;
+    margin-bottom: 20px;
+}
+a {
+	color: white;
+	text-decoration: none;
+}
+a:hover {
+	text-decoration: underline;
+}
+</style>
+<script src="build/libv86.js"></script>
+</head>
+<body>
+    <div id="main">
+        <h1>Director / Windows 95 / v86</h1>
+        <div id="menu">
+        	<a href="?v=d4">Director 4.0</a> &nbsp;|&nbsp;
+            <a href="?v=d5">Director 5.0</a> &nbsp;|&nbsp;
+            <a href="?v=d6">Director 6.0</a> &nbsp;|&nbsp;
+            <a href="?v=d65">Director 6.5</a> &nbsp;|&nbsp;
+            <a href="?v=d7">Director 7.0</a> &nbsp;|&nbsp;
+            <a href="?v=d8">Director 8.0</a> &nbsp;|&nbsp;
+            <a href="?v=d85">Director 8.5</a> &nbsp;|&nbsp;
+            <a href="?v=d9">Director 9.0</a>
+        </div>
+        <div id="screen_container">
+            <div id="console"></div>
+            <canvas style="display:none"></canvas>
+        </div>
+    </div>
+<script>
+"use strict";
+const screen_container = document.getElementById("screen_container");
+const params = new URLSearchParams(document.location.search);
+const v = params.get("v");
+if (v)
+{
+	window.emulator = new V86Starter({
+	    wasm_path: "build/v86.wasm",
+	    memory_size: 128 * 1024 * 1024,
+	    vga_memory_size: 16 * 1024 * 1024,
+	    screen_container: screen_container,
+	    bios: {
+	        url: "bios/seabios.bin",
+	    },
+	    vga_bios: {
+	        url: "bios/vgabios.bin",
+	    },
+	    hda: {
+	        url: `images/w95c_71mb_${v}.img`,
+	    },
+	    autostart: true,
+	    boot_order: 0x132,
+	    disable_speaker: true,
+	});
+
+	screen_container.addEventListener("click",  function(e)
+	{
+	    window.emulator.lock_mouse();
+	});
+}
+</script>
+</body>
+</html>
