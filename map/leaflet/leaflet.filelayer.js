@@ -72,6 +72,36 @@
                 return false;
             }
 
+			if (file.name.split('.').pop().toLowerCase() == 'kmz')
+			{
+	            reader = new FileReader();
+	            reader.onload = L.Util.bind(function (e) {
+					const zipFileHeaders = getZipFileHeaders(e.target.result);
+					const selectedFileHeader = zipFileHeaders.find(
+						header => header.filename.endsWith(".kml"),
+					);
+					// if file is found in the zip, unzip and return the data
+					if (selectedFileHeader) {
+						unzipFile(e.target.result, selectedFileHeader)
+						.then(fileData => {
+							const textDecoder = new TextDecoder("utf-8");
+							const fileDataAsString = textDecoder.decode(fileData);
+							parser = this._getParser('', 'kml');
+							this.fire('data:loading', { filename: file.name, format: parser.ext });
+							layer = parser.processor.call(this, fileDataAsString, parser.ext);
+		                    this.fire('data:loaded', {
+		                        layer: layer,
+		                        filename: file.name,
+		                        format: parser.ext
+		                    });
+						});
+					}
+
+            	}, this);
+            	reader.readAsArrayBuffer(file);
+            	return reader;
+			}
+
             // Get parser for this data type
             parser = this._getParser(file.name, ext);
             if (!parser) {
@@ -223,7 +253,7 @@
 
     var FileLayerLoad = L.Control.extend({
         statics: {
-            TITLE: 'Load local file (GPX, KML, GeoJSON)',
+            TITLE: 'Load local file (GPX, KML, KMZ, GeoJSON)',
             LABEL: '&#8965;'
         },
         options: {
@@ -231,7 +261,7 @@
             fitBounds: true,
             layerOptions: {},
             addToMap: true,
-            fileSizeLimit: 1024
+            fileSizeLimit: 20480 // 20 MB
         },
 
         initialize: function (options) {
@@ -308,7 +338,7 @@
             fileInput.type = 'file';
             fileInput.multiple = 'multiple';
             if (!this.options.formats) {
-                fileInput.accept = '.gpx,.kml,.json,.geojson';
+                fileInput.accept = '.gpx,.kml,.kmz,.json,.geojson';
             } else {
                 fileInput.accept = this.options.formats.join(',');
             }
