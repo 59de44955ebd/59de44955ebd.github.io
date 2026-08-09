@@ -1,8 +1,7 @@
 function getZipFileHeaders(buffer) {
 	const endOfCentralDirectoryValues = getEndOfCentralDirectoryValues(buffer);
-	if (!endOfCentralDirectoryValues) {
+	if (!endOfCentralDirectoryValues)
 		throw new Error("end of central directory not found");
-	}
 	const centralDirectoryFileHeaders = getCentralDirectoryFileHeaders(
 		buffer,
 		endOfCentralDirectoryValues
@@ -14,9 +13,8 @@ function getEndOfCentralDirectoryValues(buffer) {
 	const firstPossibleOffset = buffer.byteLength - EOCD_FIXED_SIZE;
 	for (let eocdOffset = firstPossibleOffset; eocdOffset > 0; eocdOffset--) {
 		const eocd = new DataView(buffer, eocdOffset);
-		if (eocd.getUint32(EOCD_OFFSET_SIGNATURE, true) !== EOCD_SIGNATURE) {
+		if (eocd.getUint32(EOCD_OFFSET_SIGNATURE, true) !== EOCD_SIGNATURE)
 			continue;
-		}
 		const recordSize = EOCD_FIXED_SIZE + eocd.getUint16(EOCD_OFFSET_COMMENT_SIZE, true);
 		if (recordSize !== eocd.byteLength)
 			continue;
@@ -32,52 +30,41 @@ function getCentralDirectoryFileHeaders(
 	{ centralDirectoryStart, numRecords }
 ) {
 	let cdfhOffset = centralDirectoryStart;
-
 	const res = [];
 	for (let record = 0; record < numRecords; record++) {
 		const cdfh = new DataView(buffer, cdfhOffset);
-		if (cdfh.getUint32(CDFH_OFFSET_SIGNATURE, true) !== CDFH_SIGNATURE) {
+		if (cdfh.getUint32(CDFH_OFFSET_SIGNATURE, true) !== CDFH_SIGNATURE)
 			throw new Error("unexpected central directory file header signature");
-		}
 		res.push({
 			fileHeaderOffset: cdfh.getUint32(CDFH_OFFSET_FILE_HEADER, true),
 			filename: decodeText(cdfh, CDFH_FIXED_SIZE, CDFH_OFFSET_FILENAME_SIZE),
 			uncompressedSize: cdfh.getUint32(CDFH_OFFSET_UNCOMPRESSED_SIZE, true)
 		});
-
 		const headerSize = CDFH_FIXED_SIZE +
 			cdfh.getUint16(CDFH_OFFSET_FILENAME_SIZE, true) +
 			cdfh.getUint16(CDFH_OFFSET_EXTRA_FIELD_SIZE, true) +
 			cdfh.getUint16(CDFH_OFFSET_COMMENT_SIZE, true);
-
 		cdfhOffset += headerSize;
 	}
-
 	return res;
 }
 
 function unzipFile(buffer, { fileHeaderOffset }) {
 	const fh = new DataView(buffer, fileHeaderOffset);
-
-	if (fh.getUint32(FH_OFFSET_SIGNATURE, true) !== FH_SIGNATURE) {
+	if (fh.getUint32(FH_OFFSET_SIGNATURE, true) !== FH_SIGNATURE)
 		throw new Error("unexpected file header signature");
-	}
-
 	const compressedDataStart = FH_FIXED_SIZE +
 		fh.getUint16(FH_OFFSET_FILENAME_SIZE, true) +
 		fh.getUint16(FH_OFFSET_EXTRA_FIELD_SIZE, true);
 	const compressedSize = fh.getUint32(FH_OFFSET_COMPRESSED_SIZE, true);
 	const compressedData = getData(fh, compressedDataStart, compressedSize);
-
 	switch (fh.getUint16(FH_OFFSET_COMPRESSION_METHOD, true)) {
-	case COMPRESSION_NONE:
-		return compressedData;
-
-	case COMPRESSION_DEFLATE:
-		return deflate(compressedData);
-
-	default:
-		throw new Error("compression method not supported");
+		case COMPRESSION_NONE:
+			return compressedData;
+		case COMPRESSION_DEFLATE:
+			return deflate(compressedData);
+		default:
+			throw new Error("compression method not supported");
 	}
 }
 

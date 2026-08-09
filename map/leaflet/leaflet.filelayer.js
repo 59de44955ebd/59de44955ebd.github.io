@@ -1,5 +1,5 @@
 /*
- * Load files *locally* (GeoJSON, KML, GPX) into the map
+ * Load files *locally* (GeoJSON, KML/KMZ, GPX) into the map
  * using the HTML5 File API.
  *
  * Requires Mapbox's togeojson.js to be in global scope
@@ -80,13 +80,13 @@
 					const selectedFileHeader = zipFileHeaders.find(
 						header => header.filename.endsWith(".kml"),
 					);
-					// if file is found in the zip, unzip and return the data
+					// We found the .kml file inside the .kmz, unzip and return the data
 					if (selectedFileHeader) {
 						unzipFile(e.target.result, selectedFileHeader)
 						.then(fileData => {
 							const textDecoder = new TextDecoder("utf-8");
 							const fileDataAsString = textDecoder.decode(fileData);
-							parser = this._getParser('', 'kml');
+							parser = this._getParser(file.name, 'kml');
 							this.fire('data:loading', { filename: file.name, format: parser.ext });
 							layer = parser.processor.call(this, fileDataAsString, parser.ext);
 		                    this.fire('data:loaded', {
