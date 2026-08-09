@@ -194,7 +194,7 @@
 
         _getParser: function (name, ext) {
             var parser;
-            ext = ext || name.split('.').pop();
+            ext = ext || name.split('.').pop().toLowerCase();
             parser = this._parsers[ext];
             if (!parser) {
                 this.fire('data:error', {
