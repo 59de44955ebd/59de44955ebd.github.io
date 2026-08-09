@@ -1,8 +1,7 @@
 // Derrived from https://blog.elantha.com/unzip-js-browser
-(function (window) {
+(function (root) {
 
-// export
-window.getZipFileHeaders = function(buffer) {
+root.getZipFileHeaders = function(buffer) {
 	const endOfCentralDirectoryValues = _getEndOfCentralDirectoryValues(buffer);
 	if (!endOfCentralDirectoryValues)
 		throw new Error("end of central directory not found");
@@ -13,8 +12,7 @@ window.getZipFileHeaders = function(buffer) {
   	return centralDirectoryFileHeaders;
 }
 
-// export
-window.unzipFile = function(buffer, { fileHeaderOffset }) {
+root.unzipFile = function(buffer, { fileHeaderOffset }) {
 	const fh = new DataView(buffer, fileHeaderOffset);
 	if (fh.getUint32(FH_OFFSET_SIGNATURE, true) !== FH_SIGNATURE)
 		throw new Error("unexpected file header signature");
