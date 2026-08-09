@@ -124,6 +124,14 @@ const road_maps = {
 //######################################
 const sat_maps = {
 
+    'ArcGIS': L.tileLayer(
+    	'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        {
+	        maxZoom: 21,
+	        attribution: '© Esri'
+	    }
+    ),
+
     'Google': L.tileLayer(
         'http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
         {
