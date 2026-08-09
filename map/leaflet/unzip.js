@@ -1,15 +1,41 @@
-function getZipFileHeaders(buffer) {
-	const endOfCentralDirectoryValues = getEndOfCentralDirectoryValues(buffer);
+// Derrived from https://blog.elantha.com/unzip-js-browser
+(function (window) {
+
+// export
+window.getZipFileHeaders = function(buffer) {
+	const endOfCentralDirectoryValues = _getEndOfCentralDirectoryValues(buffer);
 	if (!endOfCentralDirectoryValues)
 		throw new Error("end of central directory not found");
-	const centralDirectoryFileHeaders = getCentralDirectoryFileHeaders(
+	const centralDirectoryFileHeaders = _getCentralDirectoryFileHeaders(
 		buffer,
 		endOfCentralDirectoryValues
 	);
   	return centralDirectoryFileHeaders;
 }
 
-function getEndOfCentralDirectoryValues(buffer) {
+// export
+window.unzipFile = function(buffer, { fileHeaderOffset }) {
+	const fh = new DataView(buffer, fileHeaderOffset);
+	if (fh.getUint32(FH_OFFSET_SIGNATURE, true) !== FH_SIGNATURE)
+		throw new Error("unexpected file header signature");
+	const compressedDataStart = FH_FIXED_SIZE +
+		fh.getUint16(FH_OFFSET_FILENAME_SIZE, true) +
+		fh.getUint16(FH_OFFSET_EXTRA_FIELD_SIZE, true);
+	const compressedSize = fh.getUint32(FH_OFFSET_COMPRESSED_SIZE, true);
+	const compressedData = _getData(fh, compressedDataStart, compressedSize);
+	switch (fh.getUint16(FH_OFFSET_COMPRESSION_METHOD, true)) {
+		case COMPRESSION_NONE:
+			return compressedData;
+		case COMPRESSION_DEFLATE:
+			return _deflate(compressedData);
+		default:
+			throw new Error("compression method not supported");
+	}
+}
+
+// Helpers
+
+function _getEndOfCentralDirectoryValues(buffer) {
 	const firstPossibleOffset = buffer.byteLength - EOCD_FIXED_SIZE;
 	for (let eocdOffset = firstPossibleOffset; eocdOffset > 0; eocdOffset--) {
 		const eocd = new DataView(buffer, eocdOffset);
@@ -25,7 +51,7 @@ function getEndOfCentralDirectoryValues(buffer) {
 	}
 }
 
-function getCentralDirectoryFileHeaders(
+function _getCentralDirectoryFileHeaders(
 	buffer,
 	{ centralDirectoryStart, numRecords }
 ) {
@@ -37,7 +63,7 @@ function getCentralDirectoryFileHeaders(
 			throw new Error("unexpected central directory file header signature");
 		res.push({
 			fileHeaderOffset: cdfh.getUint32(CDFH_OFFSET_FILE_HEADER, true),
-			filename: decodeText(cdfh, CDFH_FIXED_SIZE, CDFH_OFFSET_FILENAME_SIZE),
+			filename: _decodeText(cdfh, CDFH_FIXED_SIZE, CDFH_OFFSET_FILENAME_SIZE),
 			uncompressedSize: cdfh.getUint32(CDFH_OFFSET_UNCOMPRESSED_SIZE, true)
 		});
 		const headerSize = CDFH_FIXED_SIZE +
@@ -49,46 +75,25 @@ function getCentralDirectoryFileHeaders(
 	return res;
 }
 
-function unzipFile(buffer, { fileHeaderOffset }) {
-	const fh = new DataView(buffer, fileHeaderOffset);
-	if (fh.getUint32(FH_OFFSET_SIGNATURE, true) !== FH_SIGNATURE)
-		throw new Error("unexpected file header signature");
-	const compressedDataStart = FH_FIXED_SIZE +
-		fh.getUint16(FH_OFFSET_FILENAME_SIZE, true) +
-		fh.getUint16(FH_OFFSET_EXTRA_FIELD_SIZE, true);
-	const compressedSize = fh.getUint32(FH_OFFSET_COMPRESSED_SIZE, true);
-	const compressedData = getData(fh, compressedDataStart, compressedSize);
-	switch (fh.getUint16(FH_OFFSET_COMPRESSION_METHOD, true)) {
-		case COMPRESSION_NONE:
-			return compressedData;
-		case COMPRESSION_DEFLATE:
-			return deflate(compressedData);
-		default:
-			throw new Error("compression method not supported");
-	}
-}
-
-// helpers
-
-function getData(dataView, offset, size) {
+function _getData(dataView, offset, size) {
 	const start = dataView.byteOffset + offset;
 	return dataView.buffer.slice(start, start + size);
 }
 
-function decodeText(dataView, offset, sizeOffset) {
+function _decodeText(dataView, offset, sizeOffset) {
 	const size = dataView.getUint16(sizeOffset, true);
-	const data = getData(dataView, offset, size);
+	const data = _getData(dataView, offset, size);
 	return new TextDecoder("ascii").decode(data);
 }
 
-function deflate(data) {
+function _deflate(data) {
 	const decodedStream = new Blob([data])
 		.stream()
 		.pipeThrough(new DecompressionStream("deflate-raw"));
 	return new Response(decodedStream).arrayBuffer();
 }
 
-// constants
+// Constants
 
 const COMPRESSION_NONE = 0;
 const COMPRESSION_DEFLATE = 8;
@@ -116,3 +121,5 @@ const EOCD_OFFSET_NUM_RECORDS = 10;
 const EOCD_OFFSET_CD_START = 16;
 const EOCD_OFFSET_COMMENT_SIZE = 20;
 const EOCD_FIXED_SIZE = 22;
+
+})(window);

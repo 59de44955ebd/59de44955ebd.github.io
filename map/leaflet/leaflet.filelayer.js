@@ -78,7 +78,7 @@
 	            reader.onload = L.Util.bind(function (e) {
 					const zipFileHeaders = getZipFileHeaders(e.target.result);
 					const selectedFileHeader = zipFileHeaders.find(
-						header => header.filename.endsWith(".kml"),
+						header => header.filename.toLowerCase().endsWith(".kml"),
 					);
 					// We found the .kml file inside the .kmz, unzip and return the data
 					if (selectedFileHeader) {
