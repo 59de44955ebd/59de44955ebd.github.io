@@ -468,10 +468,25 @@ const filelayer_style = {
     clickable: true
 };
 
+const control_elevation = L.control.elevation({
+	position:"bottomright",
+	theme: "red-theme",
+	collapsed: true,
+	margins: {
+    	top: 10,
+    	right: 25,
+    	bottom: 25,
+    	left: 50
+	},
+	detached: false,
+})
+.addTo(map);
+
 const control_filelayer = L.Control.fileLayerLoad({
     fitBounds: true,
     layerOptions: {
         style: filelayer_style,
+        onEachFeature: control_elevation.addData.bind(control_elevation),
         pointToLayer: function (data, latlng) {
             return L.circleMarker(
                 latlng,
@@ -479,8 +494,8 @@ const control_filelayer = L.Control.fileLayerLoad({
             );
         }
     }
-});
-control_filelayer.addTo(map);
+})
+.addTo(map);
 
 /**
  * Truncates value based on number of decimals
@@ -512,8 +527,21 @@ function get_path_length(layer)
     return len;
 }
 
+let current_file_layer;
+
+control_filelayer.loader.on('data:loading', function (e) {
+	if (current_file_layer)
+	{
+		current_file_layer.remove();
+		control_elevation.clear();
+		control_elevation.show(false);
+	}
+});
+
 control_filelayer.loader.on('data:loaded', function (e) {
-    control_layers.addOverlay(e.layer, e.filename);
+	current_file_layer = e.layer;
+	if (control_elevation._maxElevation != 0)
+		control_elevation.show(true);
     e.layer.bindPopup((layer) => {
     	let html = `<b>${e.filename}</b><br>`;
     	if (layer._latlngs)

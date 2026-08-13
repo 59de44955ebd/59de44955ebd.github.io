@@ -32,6 +32,11 @@ body {
 	border: 1px solid rgba(0,0,0,0.4) !important;
 	border-radius: 5px !important;
 }
+.leaflet-control.elevation
+{
+	border: 1px solid rgba(0,0,0,0.4) !important;
+	border-radius: 5px !important;
+}
 .leaflet-control-fullscreen:hover,
 .leaflet-control-search:hover,
 .leaflet-control-locate:hover,
@@ -48,6 +53,11 @@ body {
 .leaflet-control-measure a
 {
 	background-color: unset !important;
+	width: 30px !important;
+	height: 30px !important;
+}
+.leaflet-control.elevation a
+{
 	width: 30px !important;
 	height: 30px !important;
 }
@@ -126,6 +136,7 @@ body {
 .leaflet-control-scale-line:nth-child(2) {
 	display: none;
 }
+
 .heading-road::before,
 .heading-sat::before,
 .leaflet-control-layers-overlays::before
@@ -170,7 +181,7 @@ body {
 	list-style: none;
 	padding: 0;
 	margin: 0;
-	max-height: calc(100vh - 65px);
+	max-height: calc(100vh - 105px);
 	overflow-y: auto;
 }
 .sidepanel li {
