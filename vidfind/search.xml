@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-?>
 <OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/"
 	xmlns:moz="http://www.mozilla.org/2006/browser/search/">
-	<ShortName>vidfind - find movies</ShortName>
-	<Description>vidfind - find movies</Description>
-	<LongName>vidfind - find movies</LongName>
+	<ShortName>vidfind</ShortName>
+	<Description>vidfind</Description>
+	<LongName>vidfind</LongName>
 	<Developer>vidfind</Developer>
-	<Attribution>Copyright© 2026 vidfind</Attribution>
+	<Attribution>Copyright 2026 vidfind</Attribution>
 	<Tags></Tags>
 	<InputEncoding>UTF-8</InputEncoding>
 	<OutputEncoding>UTF-8</OutputEncoding>
