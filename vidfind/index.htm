@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>vidfind - find movies</title>
+<link rel="search" href="search.xml" type="application/opensearchdescription+xml" title="vidfind - find movies">
+<link rel="shortcut icon" href="favicon.ico" type="image/ico">
+<style>
+* {
+	font-family: sans-serif, arial;
+	font-size: 14px;
+	box-sizing: border-box;
+}
+body {
+	margin: 0;
+	padding: 15px;
+	max-width: 800px;
+}
+#query {
+	width:100%;
+}
+#results {
+	margin-top: 10px;
+	border-spacing: 0;
+	width: 100%;
+}
+tr:not(:first-child):hover {
+	background: #eee;
+}
+td {
+	vertical-align: top;
+}
+td:not(:last-child) {
+	padding-right: 10px;
+}
+td:not(:first-child) {
+	width: 1%;
+	white-space: nowrap;
+}
+td:not(:first-child) a {
+	padding-left: 10px;
+}
+#poster {
+	display: none;
+	width: 190px;
+	margin-top: 20px;
+	border: 1px solid black;
+}
+a {
+	text-decoration: none;
+}
+a:hover {
+	text-decoration: underline;
+}
+</style>
+</head>
+<body>
+<input type="text" id="query" placeholder="Enter Movie Title">
+<table id="results"></table>
+<img id="poster" alt="">
+<script>
+const params = new URLSearchParams(document.location.search);
+const s = params.get("s");
+if (s)
+{
+	console.log(s);
+	location.href = 'index.htm#q=' + encodeURIComponent(s);
+}
+
+const input_query = document.querySelector('#query');
+const el_results = document.querySelector('#results');
+const img_poster = document.querySelector('#poster');
+
+function show_poster(image_url)
+{
+	if (!image_url)
+		return hide_poster();
+	img_poster.src = image_url;
+	img_poster.style.display = 'block';
+}
+
+function hide_poster()
+{
+	img_poster.style.display = 'none';
+}
+
+function query_tmdb(q)
+{
+	const u = 'https://api.themoviedb.org/3/search/movie?api_key=456e13a86402d9b4a0a2fdcf7699b7c7&query=' + encodeURIComponent(q);
+
+	fetch(u)
+	.then(res => res.json())
+	.then(data => {
+		if (!data.results)
+		{
+			el_results.innerHTML = 'No results';
+			return;
+		}
+
+		let htm = '';
+		for (let row of data.results)
+		{
+			const tmdb_id = row.id;
+
+			const imageUrl = `https://image.tmdb.org/t/p/w200${row.poster_path}`;
+
+			const movie_title = row.title;
+			const movie_title_year = movie_title + (row.release_date ? ' (' + row.release_date.substr(0, 4) + ')' : '');
+
+			htm += `<tr onmouseenter="show_poster('${imageUrl}')" onmouseleave="hide_poster()">
+				<td><a target="_blank" href="https://www.themoviedb.org/movie/${tmdb_id}/" title="View on themoviedb.org (TMDB)">${movie_title_year}</a></td>
+				<td>
+					<a target="_blank" href="https://vidsrc.me/embed/${tmdb_id}" title="vidsrc">vidsrc</a>
+					<a target="_blank" href="https://vidcore.io/movie/${tmdb_id}" title="vidcore">vidcore</a>
+					<a target="_blank" href="https://vidsrc.buzz/embed/movie/${tmdb_id}" title="vidsrc_buzz">vidsrc_buzz</a>
+					<a target="_blank" href="https://videm.xyz/embed/movie/${tmdb_id}" title="videm">videm</a>
+				</td>
+			</tr>`;
+
+		}
+		el_results.innerHTML = htm;
+	});
+};
+
+window.addEventListener('hashchange', () => {
+	if (location.hash.startsWith('#q=') && location.hash.length >= 6)
+	{
+		const q = location.hash.substr(3);
+		input_query.value = decodeURIComponent(q);
+		query_tmdb(q);
+	}
+	else
+		el_results.innerHTML = '';
+}, false);
+
+input_query.onkeyup = (e) => {
+	location.hash = '#q=' + input_query.value.trim().replaceAll('?', '%3F');
+}
+
+if (location.hash.startsWith('#q=') && location.hash.length > 3)
+{
+	const q = location.hash.substr(3);
+	input_query.value = decodeURIComponent(q);
+	if (location.hash.length >= 6)
+		query_tmdb(q);
+}
+else
+	input_query.value = '';
+
+</script>
+</body>
+</html>
