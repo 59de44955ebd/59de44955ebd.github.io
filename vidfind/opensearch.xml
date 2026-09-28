@@ -11,7 +11,7 @@
 	<OutputEncoding>UTF-8</OutputEncoding>
 	<Language>en-en</Language>
 	<AdultContent>false</AdultContent>
-	<Url type="text/html" template="https://59de44955ebd.github.io/vidfind/?s={searchTerms}"></Url>
+	<Url type="text/html" template="https://59de44955ebd.github.io/vidfind/index.htm?s={searchTerms}"></Url>
 	<Image width="16" height="16" type="image/x-icon">https://59de44955ebd.github.io/vidfind/favicon.ico</Image>
 	<Query role="example" searchTerms=""/>
 	<SyndicationRight>open</SyndicationRight>
