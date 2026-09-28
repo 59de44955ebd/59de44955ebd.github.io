@@ -6,6 +6,7 @@
 <title>vidfind - find movies</title>
 <link rel="search" href="opensearch.xml" type="application/opensearchdescription+xml" title="vidfind">
 <link rel="shortcut icon" href="favicon.ico" type="image/ico">
+<meta name="color-scheme" content="light dark">
 <style>
 * {
 	font-family: sans-serif, arial;
@@ -25,7 +26,7 @@ body {
 	border-spacing: 0;
 	width: 100%;
 }
-tr:not(:first-child):hover {
+tr:hover {
 	background: #eee;
 }
 td {
@@ -48,10 +49,22 @@ td:not(:first-child) a {
 	border: 1px solid black;
 }
 a {
+	color: black;
 	text-decoration: none;
 }
 a:hover {
-	text-decoration: underline;
+	text-decoration: none;
+}
+@media (prefers-color-scheme: dark) {
+	a {
+		color: #ddd;
+	}
+	#poster {
+		border-color: #ddd;
+	}
+	tr:hover {
+		background-color: #444;
+	}
 }
 </style>
 </head>
@@ -64,7 +77,6 @@ const params = new URLSearchParams(document.location.search);
 const s = params.get("s");
 if (s)
 {
-	console.log(s);
 	location.href = 'index.htm#q=' + encodeURIComponent(s);
 }
 
@@ -111,10 +123,10 @@ function query_tmdb(q)
 			htm += `<tr onmouseenter="show_poster('${imageUrl}')" onmouseleave="hide_poster()">
 				<td><a target="_blank" href="https://www.themoviedb.org/movie/${tmdb_id}/" title="View on themoviedb.org (TMDB)">${movie_title_year}</a></td>
 				<td>
-					<a target="_blank" href="https://vidsrc.me/embed/${tmdb_id}" title="vidsrc">vidsrc</a>
-					<a target="_blank" href="https://vidcore.io/movie/${tmdb_id}" title="vidcore">vidcore</a>
-					<a target="_blank" href="https://vidsrc.buzz/embed/movie/${tmdb_id}" title="vidsrc_buzz">vidsrc_buzz</a>
-					<a target="_blank" href="https://videm.xyz/embed/movie/${tmdb_id}" title="videm">videm</a>
+					<a target="_blank" href="https://vidsrc.me/embed/${tmdb_id}" title="vidsrc.me">vidsrc</a>
+					<a target="_blank" href="https://vidcore.io/movie/${tmdb_id}" title="vidcore.io">vidcore</a>
+					<a target="_blank" href="https://vidsrc.buzz/embed/movie/${tmdb_id}" title="vidsrc.buzz">vidsrc_buzz</a>
+					<a target="_blank" href="https://videm.xyz/embed/movie/${tmdb_id}" title="videm.xyz">videm</a>
 				</td>
 			</tr>`;
 
