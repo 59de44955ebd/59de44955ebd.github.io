@@ -86,8 +86,6 @@ const img_poster = document.querySelector('#poster');
 
 function show_poster(image_url)
 {
-	if (!image_url)
-		return hide_poster();
 	img_poster.src = image_url;
 	img_poster.style.display = 'block';
 }
@@ -121,7 +119,7 @@ function query_tmdb(q)
 			const movie_title_year = movie_title + (row.release_date ? ' (' + row.release_date.substr(0, 4) + ')' : '');
 
 			htm += `<tr onmouseenter="show_poster('${imageUrl}')" onmouseleave="hide_poster()">
-				<td><a target="_blank" href="https://www.themoviedb.org/movie/${tmdb_id}/" title="View on themoviedb.org (TMDB)">${movie_title_year}</a></td>
+				<td><a target="_blank" href="https://www.themoviedb.org/movie/${tmdb_id}/" title="Show movie's TMDB page">${movie_title_year}</a></td>
 				<td>
 					<a target="_blank" href="https://vidsrc.me/embed/${tmdb_id}" title="vidsrc.me">vidsrc</a>
 					<a target="_blank" href="https://vidcore.io/movie/${tmdb_id}" title="vidcore.io">vidcore</a>
