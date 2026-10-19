@@ -39,6 +39,13 @@ body {
 .gmnoprint > .gm-style-cc {
 	display:block;
 }
+
+.mapsImagerySceneScene__root {
+	filter: invert(1);
+}
+div[style*="background-color: white"] {
+	display: none !important;
+}
 </style>
 </head>
 <body>
@@ -91,7 +98,7 @@ function init()
 		}
 		//else console.log('NOPE');
 	});
-	
+
 	is_initialized = true;
 	if (init_task)
 		init_task();
