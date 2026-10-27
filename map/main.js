@@ -705,7 +705,15 @@ div_resizer.addEventListener('mousedown', (event) => {
 });
 
 div_streetview_close.addEventListener('click', () => {
-	overlay_maps['Google Streetview'].remove();
+	//overlay_maps['Google Streetview'].remove();
+	for (let el of document.querySelectorAll('.leaflet-control-layers-selector'))
+	{
+		if (el.parentNode.textContent.includes('Streetview'))
+		{
+			el.click();
+			break;
+		}
+	}
 });
 
 function updateStreetviewMarker(pos)
