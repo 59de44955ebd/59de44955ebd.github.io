@@ -609,7 +609,11 @@ map.on('overlayadd', function(evt) {
 			);
 		}
 		else
+		{
+			iframe_streetview.contentWindow.location.reload();
 			iframe_streetview.contentWindow.gotoLatLng(latlng.lat, latlng.lng);
+		}
+
 		div_streetview_close.style.display = 'block';
 	}
     _mapchanged();
