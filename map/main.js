@@ -556,7 +556,7 @@ control_filelayer.loader.on('data:loaded', function (e) {
 function _mapchanged()
 {
     const p = map.getCenter();
-    window.location.hash = `map=${map.getZoom()}/${p.lat}/${p.lng}/${base}/${overlays.join('|')}`;
+    //window.location.hash = `map=${map.getZoom()}/${p.lat}/${p.lng}/${base}/${overlays.join('|')}`;
 	if (window.OnMapChanged)
     	window.OnMapChanged(map.getZoom(), p.lat, p.lng, base, overlays.join('|'));
 }

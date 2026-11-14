@@ -40,7 +40,7 @@ body {
 	display:block;
 }
 
-.mapsImagerySceneScene__root {
+.foo .mapsImagerySceneScene__root {
 	filter: invert(1);
 }
 div[style*="background-color: white"] {
@@ -63,6 +63,9 @@ let pos;
 
 function init()
 {
+	if (!location.href.startsWith('file:'))
+		document.querySelector('body').classList.add('foo');
+
 	panorama = new google.maps.StreetViewPanorama(panoDiv, {
 		addressControl: false,
 		fullscreenControl: false,
@@ -87,7 +90,7 @@ function init()
 
 	panorama.addListener('position_changed', function(evt){
 		pos = this.getPosition();
-		parent.updateStreetviewMarkerHash(pos, pov);
+		//parent.updateStreetviewMarkerHash(pos, pov);
 	});
 
 	panorama.addListener('pov_changed', function(evt){
@@ -95,11 +98,9 @@ function init()
 		const pov_json = JSON.stringify(pov);
 		if (pov_json != last_pov_json)
 		{
-			//console.log('pov_changed', pov);
 			last_pov_json = pov_json;
-			parent.updateStreetviewMarkerHash(pos, pov);
+			//parent.updateStreetviewMarkerHash(pos, pov);
 		}
-		//else console.log('NOPE');
 	});
 
 	is_initialized = true;
