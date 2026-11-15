@@ -215,7 +215,16 @@ body {
 	display: none;
 	cursor: ns-resize;
 }
+/*
 .streetview-container iframe {
+	box-sizing: border-box;
+	border: none;
+	display: block;
+	width: 100%;
+	height: calc(100% - 5px);
+}
+*/
+.streetview-container #pano {
 	box-sizing: border-box;
 	border: none;
 	display: block;
@@ -303,4 +312,29 @@ button.wmt {
     display: none;
     cursor: pointer;
     z-index: 9999;
+}
+/* hide some clutter, only show copyright and footage date */
+#pano .gmnoprint:first-child,
+#pano .gmnoprint:nth-child(4)
+{
+	display: none !important;
+}
+.gmnoprint li {
+	padding: 2px 5px !important;
+	font-size: 12px !important;
+}
+.gm-style-cc {
+	display: none;
+}
+.gmnoprint > .gm-style-cc {
+	display:block;
+}
+.fix .mapsImagerySceneScene__root {
+	filter: invert(1);
+}
+div[style*="background-color: white"] {
+	display: none !important;
+}
+div[style*="z-index: 1000"] {
+	display: none !important;
 }

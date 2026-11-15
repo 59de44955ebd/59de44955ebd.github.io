@@ -40,7 +40,7 @@ if (window.location.search.startsWith('?place='))
 <script src="leaflet/leaflet.commons.js"></script>
 <link href="leaflet/leaflet.commons.css" rel="stylesheet">
 
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCt-iKtoOCPEyWa8pe0nMABxUXE7ofedvo"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCt-iKtoOCPEyWa8pe0nMABxUXE7ofedvo&loading=async&callback=sv_init"></script>
 <script src="leaflet/leaflet.googlemutant.js"></script>
 
 <link rel="stylesheet" href="leaflet/leaflet.contextmenu.min.css">
@@ -55,12 +55,11 @@ if (window.location.search.startsWith('?place='))
 
 <link rel="stylesheet" href="main.css">
 <link rel="stylesheet" href="dark.css" media="(prefers-color-scheme: dark)">
+</div>
 </head>
 <body>
-
-<div class="streetview-container"><iframe></iframe><div class="resizer"></div></div>
+<div class="streetview-container"><div id="pano"></div><div class="resizer"></div></div>
 <div class="streetview-close" title="Close Streetview"></div>
-
 <div id="map" class="map">
 	<div class="sidepanel sidepanel-hiking">
 		<div class="heading">Hiking routes</div>
@@ -71,10 +70,8 @@ if (window.location.search.startsWith('?place='))
 		<ul data-flavor="cycling"></ul>
 	</div>
 </div>
-
 <iframe class="wmt"></iframe>
 <button class="wmt"></button>
-
 <script src="main.js"></script>
 </body>
 </html>

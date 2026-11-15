@@ -260,13 +260,79 @@ let has_cycling = false;
 //######################################
 // Streetview
 //######################################
+
 const div_streetview = document.querySelector('.streetview-container');
-const iframe_streetview = div_streetview.querySelector('iframe');
+const div_pano = div_streetview.querySelector('#pano');
 const div_resizer = div_streetview.querySelector('.resizer');
 const div_streetview_close = document.querySelector('.streetview-close');
 
-let streetview_loaded = false;
-let sv_lat, sv_lng, sv_heading=0, sv_pitch=0, sv_zoom=1;
+let panorama,
+	sv_initialized = false,
+	sv_init_task,
+	sv_last_pov_json,
+	sv_pov = {heading: 0, pitch: 0, zoom: 1},
+	sv_pos,
+	sv_lat, sv_lng, sv_heading=0, sv_pitch=0, sv_zoom=1;
+
+function sv_init()
+{
+	//if (!location.href.startsWith('file:'))
+	document.querySelector('body').classList.add('fix');
+
+	panorama = new google.maps.StreetViewPanorama(div_pano, {
+		addressControl: false,
+		fullscreenControl: false,
+		imageDateControl : true, // show date of images
+//		linksControl: false, // < > arrows  on top of pano image
+		showRoadLabels: false, //street name overlays on top of pano image
+		zoomControl: false,
+	});
+
+	panorama.addListener('status_changed', function(evt){
+		const status = this.getStatus();
+		if (status == google.maps.StreetViewStatus.OK)
+		{
+			panorama.setVisible(true);
+			streetview_update_marker(this.getPosition());//, this.getPov());
+		}
+		else
+		{
+			panorama.setVisible(false);
+		}
+	});
+
+	panorama.addListener('position_changed', function(evt){
+		sv_pos = this.getPosition();
+		streetview_update_marker(sv_pos, sv_pov);
+	});
+
+	panorama.addListener('pov_changed', function(evt){
+		sv_pov = this.getPov();
+		const pov_json = JSON.stringify(sv_pov);
+		if (pov_json != sv_last_pov_json)
+		{
+			sv_last_pov_json = pov_json;
+			streetview_update_hash(sv_pos, sv_pov);
+		}
+	});
+
+	sv_initialized = true;
+	if (sv_init_task)
+		sv_init_task();
+}
+
+function streetview_goto_latlng(lat, lng, pov)
+{
+	sv_init_task = function() {
+		panorama.setPosition(new google.maps.LatLng(lat, lng));
+		if (pov)
+			panorama.setPov(pov);
+	};
+	if (sv_initialized)
+	{
+		sv_init_task();
+	}
+}
 
 if (window.location.hash.startsWith('#map='))
 {
@@ -416,8 +482,9 @@ const map = L.map('map', {
 .on('click', function(evt) {
 	if (overlays.includes('Google Streetview'))
 	{
-		iframe_streetview.contentWindow.goto_latlng(evt.latlng.lat, evt.latlng.lng);
 		marker_streetview.setLatLng(evt.latlng);
+		//iframe_streetview.contentWindow.goto_latlng(evt.latlng.lat, evt.latlng.lng);
+		streetview_goto_latlng(evt.latlng.lat, evt.latlng.lng);
 	}
 })
 
@@ -600,22 +667,7 @@ map.on('overlayadd', function(evt) {
 		map.invalidateSize();
 		const latlng = map.getCenter();
 		marker_streetview.setLatLng(latlng);
-		if (!streetview_loaded)
-		{
-			iframe_streetview.src = 'streetview.htm';
-			streetview_loaded = true;
-			iframe_streetview.onload = () => iframe_streetview.contentWindow.goto_latlng(
-				sv_lat ? sv_lat : latlng.lat,
-				sv_lng ? sv_lng : latlng.lng,
-				{heading: sv_heading, pitch: sv_pitch, zoom: sv_zoom}
-			);
-		}
-		else
-		{
-			iframe_streetview.contentWindow.location.reload();
-			iframe_streetview.contentWindow.goto_latlng(latlng.lat, latlng.lng);
-		}
-
+		streetview_goto_latlng(latlng.lat, latlng.lng);
 		div_streetview_close.style.display = 'block';
 	}
     _mapchanged();
@@ -689,25 +741,25 @@ function update_trails(flavor)
 	});
 }
 
-function on_mousemove(event)
+function resizer_on_mousemove(event)
 {
 	div_streetview.style.height = `${event.clientY}px`;
 }
 
-function on_mouseup(event)
+function resizer_on_mouseup(event)
 {
-	iframe_streetview.style.display = 'block';
+	//iframe_streetview.style.display = 'block';
 	div_streetview.style.backgroundColor = 'unset';
-	document.removeEventListener('mousemove', on_mousemove);
-	document.removeEventListener('mouseup', on_mouseup);
+	document.removeEventListener('mousemove', resizer_on_mousemove);
+	document.removeEventListener('mouseup', resizer_on_mouseup);
 	map.invalidateSize();
 }
 
 div_resizer.addEventListener('mousedown', (event) => {
 	div_streetview.style.backgroundColor = '#333';
-	iframe_streetview.style.display = 'none';
-	document.addEventListener('mousemove', on_mousemove);
-	document.addEventListener('mouseup', on_mouseup);
+	//iframe_streetview.style.display = 'none';
+	document.addEventListener('mousemove', resizer_on_mousemove);
+	document.addEventListener('mouseup', resizer_on_mouseup);
 });
 
 div_streetview_close.addEventListener('click', () => {
