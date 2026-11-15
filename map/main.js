@@ -483,10 +483,14 @@ const map = L.map('map', {
 	if (overlays.includes('Google Streetview'))
 	{
 		marker_streetview.setLatLng(evt.latlng);
-		//iframe_streetview.contentWindow.goto_latlng(evt.latlng.lat, evt.latlng.lng);
 		streetview_goto_latlng(evt.latlng.lat, evt.latlng.lng);
 	}
 })
+.on('load', function(evt) {
+	// add separator after sat maps
+	document.querySelector('.leaflet-control-layers-base label:nth-child(1)').classList.add('heading-road');
+	document.querySelector(`.leaflet-control-layers-base label:nth-child(${Object.keys(road_maps).length + 1})`).classList.add('heading-sat');
+});
 
 const control_layers = L.control.layers(base_maps, overlay_maps, {position: 'topleft'}).addTo(map);
 
@@ -624,7 +628,6 @@ control_filelayer.loader.on('data:loaded', function (e) {
 function _mapchanged()
 {
     const p = map.getCenter();
-    //window.location.hash = `map=${map.getZoom()}/${p.lat}/${p.lng}/${base}/${overlays.join('|')}`;
     window.location.replace(`#map=${map.getZoom()}/${p.lat}/${p.lng}/${base}/${overlays.join('|')}`);
 	if (window.OnMapChanged)
     	window.OnMapChanged(map.getZoom(), p.lat, p.lng, base, overlays.join('|'));
@@ -748,7 +751,6 @@ function resizer_on_mousemove(event)
 
 function resizer_on_mouseup(event)
 {
-	//iframe_streetview.style.display = 'block';
 	div_streetview.style.backgroundColor = 'unset';
 	document.removeEventListener('mousemove', resizer_on_mousemove);
 	document.removeEventListener('mouseup', resizer_on_mouseup);
@@ -757,7 +759,6 @@ function resizer_on_mouseup(event)
 
 div_resizer.addEventListener('mousedown', (event) => {
 	div_streetview.style.backgroundColor = '#333';
-	//iframe_streetview.style.display = 'none';
 	document.addEventListener('mousemove', resizer_on_mousemove);
 	document.addEventListener('mouseup', resizer_on_mouseup);
 });
@@ -782,35 +783,7 @@ function streetview_update_marker(pos)
 function streetview_update_hash(pos, pov)
 {
 	const p = map.getCenter();
-	//window.location.hash = `map=${map.getZoom()}/${p.lat}/${p.lng}/${base}/${overlays.join('|')}/${[pos.lat(), pos.lng(), pov.heading, pov.pitch, pov.zoom].join('|')}`;
 	window.location.replace(`#map=${map.getZoom()}/${p.lat}/${p.lng}/${base}/${overlays.join('|')}/${[pos.lat(), pos.lng(), pov.heading, pov.pitch, pov.zoom].join('|')}`);
-}
-
-function goto_place(place)
-{
-	fetch(`https://nominatim.openstreetmap.org/search?format=json&accept-language=de-DE&q=${place}`)
-	.then(res => res.json())
-	.then(res => {
-		if (res.length)
-		{
-			map.setView([res[0].lat, res[0].lon], 14);
-			// add separator after sat maps
-			document.querySelector('.leaflet-control-layers-base label:nth-child(1)').classList.add('heading-road');
-			document.querySelector(`.leaflet-control-layers-base label:nth-child(${Object.keys(road_maps).length + 1})`).classList.add('heading-sat');
-			new L.Marker([res[0].lat, res[0].lon], {
-				icon: new L.Icon.Default,
-		        contextmenu: true,
-		        contextmenuInheritItems: false,
-		        contextmenuItems: [{
-		            text: 'Remove',
-		            callback: (e) => {
-		            	e.relatedTarget.remove();
-		            },
-		        }],
-			})
-			.addTo(map);
-		}
-	});
 }
 
 const iframe_wmt = document.querySelector('iframe.wmt');
@@ -857,25 +830,9 @@ function reset_theme()
 	dark_css.media = '(prefers-color-scheme: dark)';
 }
 
-if (window.location.hash.startsWith('#place='))
+function set_marker(lat, lng, zoom)
 {
-	const place = window.location.hash.substr(7);
-	goto_place(place);
-}
-else if (window.location.hash.startsWith('#marker='))
-{
-	// https://opentopomap.org/#marker=12/40.673/-73.946
-
-    const parts = window.location.hash.substr(8).split('/');
-    zoom = parseInt(parts[0]);
-    lat = parseFloat(parts[1]);
-    lng = parseFloat(parts[2]);
-
 	map.setView([lat, lng], zoom);
-	// add separator after sat maps
-	document.querySelector('.leaflet-control-layers-base label:nth-child(1)').classList.add('heading-road');
-	document.querySelector(`.leaflet-control-layers-base label:nth-child(${Object.keys(road_maps).length + 1})`).classList.add('heading-sat');
-
 	new L.Marker([lat, lng], {
 		icon: new L.Icon.Default,
         contextmenu: true,
@@ -889,12 +846,29 @@ else if (window.location.hash.startsWith('#marker='))
 	})
 	.addTo(map);
 }
+
+function goto_place(place)
+{
+	fetch(`https://nominatim.openstreetmap.org/search?format=json&accept-language=de-DE&q=${place}`)
+	.then(res => res.json())
+	.then(res => {
+		if (res.length)
+			set_marker(res[0].lat, res[0].lon, 14);
+	});
+}
+
+if (window.location.hash.startsWith('#place='))
+{
+	const place = window.location.hash.substr(7);
+	goto_place(place);
+}
+else if (window.location.hash.startsWith('#marker='))
+{
+    const parts = window.location.hash.substr(8).split('/');
+	set_marker(parseFloat(parts[1]), parseFloat(parts[2]), parseInt(parts[0]));
+}
 else
 {
 	map.setView([lat, lng], zoom);
-	// add separator after sat maps
-	document.querySelector('.leaflet-control-layers-base label:nth-child(1)').classList.add('heading-road');
-	document.querySelector(`.leaflet-control-layers-base label:nth-child(${Object.keys(road_maps).length + 1})`).classList.add('heading-sat');
-
 	_mapchanged();
 }
