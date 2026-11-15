@@ -242,7 +242,7 @@ const overlay_maps = {
 
 overlay_maps['Google Streetview'].addGoogleLayer('StreetViewCoverageLayer');
 
-let base = 'OpenStreetMap', overlays = [], overlays_start = null;
+let base = 'OpenTopoMap', overlays = [], overlays_start = null;
 let zoom, lat, lng;
 
 //######################################
@@ -303,8 +303,9 @@ if (!lng)
     lng = 13.409671783447267;
 }
 
-if (!window.location.hash.startsWith('#place='))
-	window.location.hash = `map=${zoom}/${lat}/${lng}/${base}/${overlays.join('|')}`;
+if (!window.location.hash.startsWith('#place=') && !window.location.hash.startsWith('#marker='))
+	//window.location.hash = `map=${zoom}/${lat}/${lng}/${base}/${overlays.join('|')}`;
+	window.location.replace(`#map=${zoom}/${lat}/${lng}/${base}/${overlays.join('|')}`);
 
 const marker_streetview = new L.Marker([lat, lng], {
 	icon: new L.Icon.Default({'iconUrl': 'marker-icon-black.png'}),
@@ -415,7 +416,7 @@ const map = L.map('map', {
 .on('click', function(evt) {
 	if (overlays.includes('Google Streetview'))
 	{
-		iframe_streetview.contentWindow.gotoLatLng(evt.latlng.lat, evt.latlng.lng);
+		iframe_streetview.contentWindow.goto_latlng(evt.latlng.lat, evt.latlng.lng);
 		marker_streetview.setLatLng(evt.latlng);
 	}
 })
@@ -557,6 +558,7 @@ function _mapchanged()
 {
     const p = map.getCenter();
     //window.location.hash = `map=${map.getZoom()}/${p.lat}/${p.lng}/${base}/${overlays.join('|')}`;
+    window.location.replace(`#map=${map.getZoom()}/${p.lat}/${p.lng}/${base}/${overlays.join('|')}`);
 	if (window.OnMapChanged)
     	window.OnMapChanged(map.getZoom(), p.lat, p.lng, base, overlays.join('|'));
 }
@@ -602,7 +604,7 @@ map.on('overlayadd', function(evt) {
 		{
 			iframe_streetview.src = 'streetview.htm';
 			streetview_loaded = true;
-			iframe_streetview.onload = () => iframe_streetview.contentWindow.gotoLatLng(
+			iframe_streetview.onload = () => iframe_streetview.contentWindow.goto_latlng(
 				sv_lat ? sv_lat : latlng.lat,
 				sv_lng ? sv_lng : latlng.lng,
 				{heading: sv_heading, pitch: sv_pitch, zoom: sv_zoom}
@@ -611,7 +613,7 @@ map.on('overlayadd', function(evt) {
 		else
 		{
 			iframe_streetview.contentWindow.location.reload();
-			iframe_streetview.contentWindow.gotoLatLng(latlng.lat, latlng.lng);
+			iframe_streetview.contentWindow.goto_latlng(latlng.lat, latlng.lng);
 		}
 
 		div_streetview_close.style.display = 'block';
@@ -720,18 +722,19 @@ div_streetview_close.addEventListener('click', () => {
 	}
 });
 
-function updateStreetviewMarker(pos)
+function streetview_update_marker(pos)
 {
 	marker_streetview.setLatLng([pos.lat(), pos.lng()]);
 }
 
-function updateStreetviewMarkerHash(pos, pov)
+function streetview_update_hash(pos, pov)
 {
 	const p = map.getCenter();
-	window.location.hash = `map=${map.getZoom()}/${p.lat}/${p.lng}/${base}/${overlays.join('|')}/${[pos.lat(), pos.lng(), pov.heading, pov.pitch, pov.zoom].join('|')}`;
+	//window.location.hash = `map=${map.getZoom()}/${p.lat}/${p.lng}/${base}/${overlays.join('|')}/${[pos.lat(), pos.lng(), pov.heading, pov.pitch, pov.zoom].join('|')}`;
+	window.location.replace(`#map=${map.getZoom()}/${p.lat}/${p.lng}/${base}/${overlays.join('|')}/${[pos.lat(), pos.lng(), pov.heading, pov.pitch, pov.zoom].join('|')}`);
 }
 
-function gotoPlace(place)
+function goto_place(place)
 {
 	fetch(`https://nominatim.openstreetmap.org/search?format=json&accept-language=de-DE&q=${place}`)
 	.then(res => res.json())
@@ -805,7 +808,34 @@ function reset_theme()
 if (window.location.hash.startsWith('#place='))
 {
 	const place = window.location.hash.substr(7);
-	gotoPlace(place);
+	goto_place(place);
+}
+else if (window.location.hash.startsWith('#marker='))
+{
+	// https://opentopomap.org/#marker=12/40.673/-73.946
+
+    const parts = window.location.hash.substr(8).split('/');
+    zoom = parseInt(parts[0]);
+    lat = parseFloat(parts[1]);
+    lng = parseFloat(parts[2]);
+
+	map.setView([lat, lng], zoom);
+	// add separator after sat maps
+	document.querySelector('.leaflet-control-layers-base label:nth-child(1)').classList.add('heading-road');
+	document.querySelector(`.leaflet-control-layers-base label:nth-child(${Object.keys(road_maps).length + 1})`).classList.add('heading-sat');
+
+	new L.Marker([lat, lng], {
+		icon: new L.Icon.Default,
+        contextmenu: true,
+        contextmenuInheritItems: false,
+        contextmenuItems: [{
+            text: 'Remove',
+            callback: (e) => {
+            	e.relatedTarget.remove();
+            },
+        }],
+	})
+	.addTo(map);
 }
 else
 {

@@ -80,7 +80,7 @@ function init()
 		if (status == google.maps.StreetViewStatus.OK)
 		{
 			panorama.setVisible(true);
-			parent.updateStreetviewMarker(this.getPosition());//, this.getPov());
+			parent.streetview_update_marker(this.getPosition());//, this.getPov());
 		}
 		else
 		{
@@ -90,7 +90,7 @@ function init()
 
 	panorama.addListener('position_changed', function(evt){
 		pos = this.getPosition();
-		//parent.updateStreetviewMarkerHash(pos, pov);
+		parent.streetview_update_marker(pos, pov);
 	});
 
 	panorama.addListener('pov_changed', function(evt){
@@ -99,7 +99,7 @@ function init()
 		if (pov_json != last_pov_json)
 		{
 			last_pov_json = pov_json;
-			//parent.updateStreetviewMarkerHash(pos, pov);
+			parent.streetview_update_hash(pos, pov);
 		}
 	});
 
@@ -108,7 +108,7 @@ function init()
 		init_task();
 }
 
-function gotoLatLng(lat, lng, pov)
+function goto_latlng(lat, lng, pov)
 {
 	init_task = function() {
 		panorama.setPosition(new google.maps.LatLng(lat, lng));
