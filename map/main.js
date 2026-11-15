@@ -4,6 +4,8 @@ const MAPBOX_KEY = 'pk.eyJ1IjoidnNsNDIiLCJhIjoiY2xha3o1ZmZ0MDA4ZDN2bXMzcnIweWhhc
 const MAPTILER_KEY = 'ppaPBnSs4o1IOGtXW8oI';
 const THUNDERFOREST_KEY = 'c6644d4c8d6f4bd18067c449f978a779';
 
+const ADD_STREETVIEW = true;
+
 //######################################
 // road maps
 //######################################
@@ -214,13 +216,7 @@ const overlay_maps = {
 	    }
     ),
 
-	'Google Streetview': L.gridLayer.googleMutant({
-		type: null,
-		styles: [],
-		//minZoom: 13,
-	})
-	.on('add', (evt) => evt.target._map._container.classList.toggle('streetview', true))
-	.on('remove', (evt) => evt.target._map._container.classList.toggle('streetview', false)),
+	'Google Streetview': null,
 
     'Hiking': L.tileLayer(
         'https://tile.waymarkedtrails.org/hiking/{z}/{x}/{y}.png',
@@ -240,7 +236,19 @@ const overlay_maps = {
 
 };
 
-overlay_maps['Google Streetview'].addGoogleLayer('StreetViewCoverageLayer');
+if (ADD_STREETVIEW)
+{
+	overlay_maps['Google Streetview'] = L.gridLayer.googleMutant({
+//		type: 'roadmap',
+		type: null,
+		styles: [],
+	})
+	.on('add', (evt) => evt.target._map._container.classList.toggle('streetview', true))
+	.on('remove', (evt) => evt.target._map._container.classList.toggle('streetview', false));
+//	overlay_maps['Google Streetview'].addGoogleLayer('StreetViewCoverageLayer');
+}
+else
+	delete overlay_maps['Google Streetview'];
 
 let base = 'OpenTopoMap', overlays = [], overlays_start = null;
 let zoom, lat, lng;
@@ -253,9 +261,6 @@ const ul_hiking = sidepanel_hiking.querySelector('ul');
 
 const sidepanel_cycling = document.querySelector('.sidepanel-cycling');
 const ul_cycling = sidepanel_cycling.querySelector('ul');
-
-let has_hiking = false;
-let has_cycling = false;
 
 //######################################
 // Streetview
@@ -271,11 +276,19 @@ let panorama,
 	sv_init_task,
 	sv_last_pov_json,
 	sv_pov = {heading: 0, pitch: 0, zoom: 1},
-	sv_pos,
-	sv_lat, sv_lng, sv_heading=0, sv_pitch=0, sv_zoom=1;
+	sv_pos, sv_lat, sv_lng, sv_heading=0, sv_pitch=0, sv_zoom=1, sv_coverage_loaded = false,
+	marker_streetview,
+	has_hiking = false,
+	has_cycling = false,
+	control_routing,
+	marker_from, marker_to,
+	current_file_layer;
 
 function sv_init()
 {
+	if (!ADD_STREETVIEW)
+		return;
+
 	//if (!location.href.startsWith('file:'))
 	document.querySelector('body').classList.add('fix');
 
@@ -373,13 +386,11 @@ if (!window.location.hash.startsWith('#place=') && !window.location.hash.startsW
 	//window.location.hash = `map=${zoom}/${lat}/${lng}/${base}/${overlays.join('|')}`;
 	window.location.replace(`#map=${zoom}/${lat}/${lng}/${base}/${overlays.join('|')}`);
 
-const marker_streetview = new L.Marker([lat, lng], {
-	icon: new L.Icon.Default({'iconUrl': 'marker-icon-black.png'}),
-    contextmenu: false,
-});
-
-let control_routing;
-let marker_from, marker_to;
+if (ADD_STREETVIEW)
+	marker_streetview = new L.Marker([lat, lng], {
+		icon: new L.Icon.Default({'iconUrl': 'marker-icon-black.png'}),
+	    contextmenu: false,
+	});
 
 const map = L.map('map', {
 	editable: true,
@@ -599,8 +610,6 @@ function get_path_length(layer)
     return len;
 }
 
-let current_file_layer;
-
 control_filelayer.loader.on('data:loading', function (e) {
 	if (current_file_layer)
 	{
@@ -672,6 +681,14 @@ map.on('overlayadd', function(evt) {
 		marker_streetview.setLatLng(latlng);
 		streetview_goto_latlng(latlng.lat, latlng.lng);
 		div_streetview_close.style.display = 'block';
+
+		if (!sv_coverage_loaded)
+		{
+			sv_coverage_loaded = true;
+			setTimeout(() => {
+				overlay_maps['Google Streetview'].addGoogleLayer('StreetViewCoverageLayer');
+				}, 1000);
+		}
 	}
     _mapchanged();
 });
@@ -744,36 +761,39 @@ function update_trails(flavor)
 	});
 }
 
-function resizer_on_mousemove(event)
+if (ADD_STREETVIEW)
 {
-	div_streetview.style.height = `${event.clientY}px`;
-}
-
-function resizer_on_mouseup(event)
-{
-	div_streetview.style.backgroundColor = 'unset';
-	document.removeEventListener('mousemove', resizer_on_mousemove);
-	document.removeEventListener('mouseup', resizer_on_mouseup);
-	map.invalidateSize();
-}
-
-div_resizer.addEventListener('mousedown', (event) => {
-	div_streetview.style.backgroundColor = '#333';
-	document.addEventListener('mousemove', resizer_on_mousemove);
-	document.addEventListener('mouseup', resizer_on_mouseup);
-});
-
-div_streetview_close.addEventListener('click', () => {
-	//overlay_maps['Google Streetview'].remove();
-	for (let el of document.querySelectorAll('.leaflet-control-layers-selector'))
+	function resizer_on_mousemove(event)
 	{
-		if (el.parentNode.textContent.includes('Streetview'))
-		{
-			el.click();
-			break;
-		}
+		div_streetview.style.height = `${event.clientY}px`;
 	}
-});
+
+	function resizer_on_mouseup(event)
+	{
+		div_streetview.style.backgroundColor = 'unset';
+		document.removeEventListener('mousemove', resizer_on_mousemove);
+		document.removeEventListener('mouseup', resizer_on_mouseup);
+		map.invalidateSize();
+	}
+
+	div_resizer.addEventListener('mousedown', (event) => {
+		div_streetview.style.backgroundColor = '#333';
+		document.addEventListener('mousemove', resizer_on_mousemove);
+		document.addEventListener('mouseup', resizer_on_mouseup);
+	});
+
+	div_streetview_close.addEventListener('click', () => {
+		//overlay_maps['Google Streetview'].remove();
+		for (let el of document.querySelectorAll('.leaflet-control-layers-selector'))
+		{
+			if (el.parentNode.textContent.includes('Streetview'))
+			{
+				el.click();
+				break;
+			}
+		}
+	});
+}
 
 function streetview_update_marker(pos)
 {
