@@ -5,6 +5,7 @@ const MAPTILER_KEY = 'ppaPBnSs4o1IOGtXW8oI';
 const THUNDERFOREST_KEY = 'c6644d4c8d6f4bd18067c449f978a779';
 
 const ADD_STREETVIEW = true;
+const UPDATE_HASH = true;
 
 //######################################
 // road maps
@@ -325,7 +326,8 @@ function sv_init()
 		if (pov_json != sv_last_pov_json)
 		{
 			sv_last_pov_json = pov_json;
-			streetview_update_hash(sv_pos, sv_pov);
+			if (UPDATE_HASH)
+				streetview_update_hash(sv_pos, sv_pov);
 		}
 	});
 
@@ -347,11 +349,11 @@ function streetview_goto_latlng(lat, lng, pov)
 	}
 }
 
-if (window.location.hash.startsWith('#map='))
+if (location.hash.startsWith('#map='))
 {
     try
     {
-        const parts = window.location.hash.substr(5).split('/');
+        const parts = location.hash.substr(5).split('/');
         zoom = parseInt(parts[0]);
         lat = parseFloat(parts[1]);
         lng = parseFloat(parts[2]);
@@ -382,9 +384,8 @@ if (!lng)
     lng = 13.409671783447267;
 }
 
-if (!window.location.hash.startsWith('#place=') && !window.location.hash.startsWith('#marker='))
-	//window.location.hash = `map=${zoom}/${lat}/${lng}/${base}/${overlays.join('|')}`;
-	window.location.replace(`#map=${zoom}/${lat}/${lng}/${base}/${overlays.join('|')}`);
+if (UPDATE_HASH && !location.hash.startsWith('#place=') && !location.hash.startsWith('#marker='))
+	location.replace(`#map=${zoom}/${lat}/${lng}/${base}/${overlays.join('|')}`);
 
 if (ADD_STREETVIEW)
 	marker_streetview = new L.Marker([lat, lng], {
@@ -637,7 +638,8 @@ control_filelayer.loader.on('data:loaded', function (e) {
 function _mapchanged()
 {
     const p = map.getCenter();
-    window.location.replace(`#map=${map.getZoom()}/${p.lat}/${p.lng}/${base}/${overlays.join('|')}`);
+    if (UPDATE_HASH)
+    	location.replace(`#map=${map.getZoom()}/${p.lat}/${p.lng}/${base}/${overlays.join('|')}`);
 	if (window.OnMapChanged)
     	window.OnMapChanged(map.getZoom(), p.lat, p.lng, base, overlays.join('|'));
 }
@@ -803,7 +805,7 @@ function streetview_update_marker(pos)
 function streetview_update_hash(pos, pov)
 {
 	const p = map.getCenter();
-	window.location.replace(`#map=${map.getZoom()}/${p.lat}/${p.lng}/${base}/${overlays.join('|')}/${[pos.lat(), pos.lng(), pov.heading, pov.pitch, pov.zoom].join('|')}`);
+	location.replace(`#map=${map.getZoom()}/${p.lat}/${p.lng}/${base}/${overlays.join('|')}/${[pos.lat(), pos.lng(), pov.heading, pov.pitch, pov.zoom].join('|')}`);
 }
 
 const iframe_wmt = document.querySelector('iframe.wmt');
@@ -877,14 +879,14 @@ function goto_place(place)
 	});
 }
 
-if (window.location.hash.startsWith('#place='))
+if (location.hash.startsWith('#place='))
 {
-	const place = window.location.hash.substr(7);
+	const place = location.hash.substr(7);
 	goto_place(place);
 }
-else if (window.location.hash.startsWith('#marker='))
+else if (location.hash.startsWith('#marker='))
 {
-    const parts = window.location.hash.substr(8).split('/');
+    const parts = location.hash.substr(8).split('/');
 	set_marker(parseFloat(parts[1]), parseFloat(parts[2]), parseInt(parts[0]));
 }
 else
