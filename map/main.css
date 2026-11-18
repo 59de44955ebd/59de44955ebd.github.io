@@ -223,6 +223,7 @@ body {
 }
 .streetview-container .resizer {
 	height: 5px;
+	background-color: #000;
 }
 .streetview-container .resizer:hover {
 	background-color: #333;

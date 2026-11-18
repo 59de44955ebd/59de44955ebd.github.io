@@ -149,6 +149,7 @@
 	}
 .leaflet-bottom {
 	bottom: 0;
+	margin-bottom: 0 !important;
 	}
 .leaflet-left {
 	left: 0;
